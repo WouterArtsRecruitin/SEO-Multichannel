@@ -337,6 +337,7 @@
 </div>
 <div class="hint mono">← → wisselt scenes · spatie = play/pauze</div>
 
+<script src="assets/neo-mask.js"></script>
 <script>
 /* ============================================================
    OMNICHANNEL AI AGENCY — animated architecture (self-contained)
@@ -580,7 +581,7 @@ function go(i,manual){
   // architecture hidden through the cinematic intro; revealed as the wall shatters
   world.style.opacity = (cine && !s.shatter) ? '0' : '1';
   if(s.coldopen) runColdOpen();
-  if(s.neo){ schedule(3200,()=>blink(),i); schedule(4500,()=>speak(),i); }
+  if(s.neo){ schedule(4200,()=>glitchBurst(650),i); schedule(5400,()=>glitchBurst(1100),i); }
   if(s.shatter){ world.style.opacity='0'; schedule(1600,()=>{ world.style.opacity='1'; },i); showWords(i); }
   setRain(s.rain || 'dim');
   [...dots.children].forEach((b,bi)=>b.classList.toggle('a',bi===i));
@@ -672,27 +673,44 @@ const rr=(g,x,y,w,h,r)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);
   g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();g.fill();};
 function mkMask(draw){ const c=document.createElement('canvas'); c.width=F_W; c.height=F_H;
   const g=c.getContext('2d'); draw(g); return g.getImageData(0,0,F_W,F_H).data; }
-const FACE=mkMask((g)=>{
-  const cx=FCX, cy=FCY; g.filter='blur(8px)';
-  const rg=g.createRadialGradient(cx,cy-30,30,cx,cy+30,350);
-  rg.addColorStop(0,'#fff'); rg.addColorStop(.6,'rgba(255,255,255,.62)'); rg.addColorStop(1,'rgba(255,255,255,0)');
-  g.save(); g.beginPath(); g.ellipse(cx,cy,235,325,0,0,7); g.clip(); g.fillStyle=rg; g.fillRect(0,0,F_W,F_H); g.restore();
-  g.fillStyle='rgba(255,255,255,.5)'; g.beginPath(); g.ellipse(cx,cy-215,225,155,0,Math.PI,2*Math.PI); g.fill();
-  g.fillRect(cx-225,cy-215,450,70);
-  g.fillStyle='rgba(255,255,255,.3)'; rr(g,cx-190,cy+305,380,150,60);
-  g.filter='blur(3px)'; g.globalCompositeOperation='destination-out'; g.fillStyle='#000';
-  rr(g,cx-205,cy-45,170,100,36); rr(g,cx+35,cy-45,170,100,36); g.fillRect(cx-42,cy-18,84,24);
-});
+// FACE mask is derived from the uploaded Neo/Matrix frame (luminance → bright code chars).
+// Loaded from a data-URI (assets/neo-mask.js) so the canvas is never tainted.
+let FACE=null;
+(function loadFace(){
+  if(!window.NEO_MASK) return;
+  const im=new Image();
+  im.onload=()=>{
+    const c=document.createElement('canvas'); c.width=F_W; c.height=F_H;
+    const g=c.getContext('2d');
+    const w=1040, h=w*im.height/im.width, x=(F_W-w)/2, y=(F_H-h)/2;
+    g.drawImage(im,x,y,w,h);
+    FACE=g.getImageData(0,0,F_W,F_H).data;
+  };
+  im.src=window.NEO_MASK;
+})();
 const EYES=mkMask((g)=>{ g.filter='blur(4px)'; g.fillStyle='#fff';
   g.beginPath(); g.ellipse(FCX-120,FCY+2,50,18,0,0,7); g.fill();
   g.beginPath(); g.ellipse(FCX+120,FCY+2,50,18,0,0,7); g.fill(); });
 const MOUTH=mkMask((g)=>{ g.filter='blur(5px)'; g.fillStyle='#fff';
   g.beginPath(); g.ellipse(FCX,FCY+150,72,26,0,0,7); g.fill(); });
+// two hands/forearms raised to the sunglasses (the iconic Matrix Reloaded pose)
+const HANDS=mkMask((g)=>{
+  g.filter='blur(6px)'; g.fillStyle='#fff'; g.strokeStyle='#fff'; g.lineCap='round'; g.lineJoin='round';
+  g.lineWidth=56;                                   // forearms from lower sides up to the temples
+  g.beginPath(); g.moveTo(FCX-345,FCY+320); g.lineTo(FCX-255,FCY+120); g.lineTo(FCX-180,FCY-28); g.stroke();
+  g.beginPath(); g.moveTo(FCX+345,FCY+320); g.lineTo(FCX+255,FCY+120); g.lineTo(FCX+180,FCY-28); g.stroke();
+  g.beginPath(); g.ellipse(FCX-176,FCY-42,48,58,0.2,0,7); g.fill();   // hands at the temples
+  g.beginPath(); g.ellipse(FCX+176,FCY-42,48,58,-0.2,0,7); g.fill();
+  g.lineWidth=15;                                   // fingers reaching over the shades
+  g.beginPath(); g.moveTo(FCX-176,FCY-74); g.lineTo(FCX-116,FCY-54); g.stroke();
+  g.beginPath(); g.moveTo(FCX+176,FCY-74); g.lineTo(FCX+116,FCY-54); g.stroke();
+});
 const lumAt=(A,x,y)=>{ x|=0;y|=0; if(x<0||y<0||x>=F_W||y>=F_H)return 0; return A[(y*F_W+x)*4]/255; };
 
 /* ---- phase state ---- */
 let rainMode='dim', buildP=1, faceP=0, buildT=1, faceT=0;
-let eyeGlow=0, mouthOpen=0;
+let eyeGlow=0, mouthOpen=0, glitchUntil=0;
+function glitchBurst(ms){ glitchUntil=performance.now()+(ms||800); }
 function setRain(mode){
   if(mode==='off'){ rainMode='off'; buildP=1;buildT=1; faceP=0;faceT=0; }
   else if(mode==='build'){ rainMode='build'; buildP=0;buildT=1; faceP=0;faceT=0; }
@@ -761,18 +779,20 @@ function rdraw(){
       drops[i]+= colSpd[i]*(dim?0.8:1);
     }
   }
-  // face reveal + blink + mouth
-  if(faceP>0.02){
-    for(let gy=FS; gy<F_H; gy+=FS){
-      for(let gx=0; gx<F_W; gx+=FS){
-        if(mouthOpen>0.3 && lumAt(MOUTH,gx,gy)>0.3) continue;         // open mouth = dark gap
-        if(eyeGlow>0.5 && lumAt(EYES,gx,gy)>0.3){                     // eyes flash through the shades
-          rctx.fillStyle='rgba(170,255,195,'+Math.min(1,faceP)+')'; rctx.fillText(rC(),gx,gy); continue; }
+  // face reveal — Neo (incl. the hands adjusting the shades) built from code, fine grid + glitch surge
+  if(faceP>0.02 && FACE){
+    const gl = now < glitchUntil, FG=13;
+    rctx.font='13px "Courier New",monospace';
+    for(let gy=FG; gy<F_H; gy+=FG){
+      const rowGl = gl && Math.random()>0.85;
+      const jx = gl ? ((Math.random()*2-1)*8)|0 : 0;
+      for(let gx=0; gx<F_W; gx+=FG){
         const lum=lumAt(FACE,gx,gy);
-        if(lum<0.16) continue;
-        const a=Math.min(1, lum*faceP*1.4);
-        rctx.fillStyle = lum>0.62 ? 'rgba(216,255,226,'+a+')' : 'rgba(74,255,128,'+(a*0.9)+')';
-        rctx.fillText(rC(),gx,gy);
+        if(lum<0.12) continue;
+        let a=Math.min(1, Math.pow(lum,1.15)*faceP*2.2);
+        if(rowGl) a*=0.4;
+        rctx.fillStyle = lum>0.5 ? 'rgba(224,255,232,'+a+')' : 'rgba(55,242,116,'+(a*0.92)+')';
+        rctx.fillText(rC(), gx+(rowGl?jx*3:jx), gy);
       }
     }
   }
