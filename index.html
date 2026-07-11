@@ -78,21 +78,21 @@
     box-shadow:0 8px 30px rgba(0,0,0,.45);
     transition:transform .7s cubic-bezier(.22,.61,.36,1),box-shadow .7s ease,
       border-color .7s ease,opacity .7s ease,filter .7s ease;
-    opacity:.45;filter:saturate(.6)}
-  .node.on{opacity:1;filter:saturate(1);
-    box-shadow:0 0 0 1px var(--nc),0 0 34px -6px var(--nc),0 12px 40px rgba(0,0,0,.55);
+    opacity:.24;filter:saturate(.4) blur(1.7px)}          /* inactive = background "proof" texture */
+  .node.on{opacity:1;filter:saturate(1) blur(0);
+    box-shadow:0 0 0 1px var(--nc),0 0 38px -5px var(--nc),0 12px 40px rgba(0,0,0,.55);
     transform:translateY(-2px)}
-  .node .h{font-size:19px;font-weight:800;letter-spacing:.2px;line-height:1.15;display:flex;gap:10px;align-items:center}
-  .node .ic{font-size:20px;filter:drop-shadow(0 0 6px var(--nc))}
-  .node .b{margin-top:7px;font-size:13.5px;color:var(--muted);line-height:1.35}
+  .node .h{font-size:20px;font-weight:800;letter-spacing:.2px;line-height:1.15;display:flex;gap:10px;align-items:center;color:#ffffff}
+  .node .ic{font-size:21px;filter:drop-shadow(0 0 6px var(--nc))}
+  .node .b{margin-top:7px;font-size:15px;color:#dbe4f0;line-height:1.4}   /* was muted grey — brighter for mobile */
   .node .s{margin-top:11px;display:inline-flex;gap:8px;align-items:center;
-    font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#cbd5e1}
+    font-size:11.5px;letter-spacing:.6px;text-transform:uppercase;color:#e2e8f0}
   .node .dot{width:9px;height:9px;border-radius:50%;background:var(--nc);
     box-shadow:0 0 10px var(--nc);animation:pulse 1.8s ease-in-out infinite}
   @keyframes pulse{50%{opacity:.35;transform:scale(.85)}}
   .node .sk{margin-top:9px;display:flex;flex-wrap:wrap;gap:5px}
-  .node .sk span{font-family:ui-monospace,"Roboto Mono",monospace;font-size:10px;color:#7dd3fc;
-    border:1px solid rgba(125,211,252,.35);border-radius:5px;padding:2px 6px;letter-spacing:.2px}
+  .node .sk span{font-family:ui-monospace,"Roboto Mono",monospace;font-size:11.5px;color:#b6e3ff;
+    border:1px solid rgba(150,215,255,.5);border-radius:5px;padding:2px 7px;letter-spacing:.2px}
 
   .wlabel{position:absolute;font-size:11px;letter-spacing:3px;text-transform:uppercase;
     color:var(--muted);opacity:.6}
@@ -113,11 +113,14 @@
     background:linear-gradient(180deg,#fff,#7dd3fc);-webkit-background-clip:text;background-clip:text;color:transparent}
   #sceneno .tot{font-size:12px;color:var(--muted);letter-spacing:2px}
 
-  #chapter{position:absolute;z-index:6;left:40px;top:120px;pointer-events:none}
-  #chapter .kick{font-size:12px;letter-spacing:4px;color:var(--matrix);text-transform:uppercase;
+  #chapter{position:absolute;z-index:6;left:40px;right:40px;top:112px;pointer-events:none}
+  #chapter .kick{font-size:13px;letter-spacing:4px;color:var(--matrix);text-transform:uppercase;
     text-shadow:0 0 12px rgba(0,255,65,.6)}
-  #chapter h2{font-size:40px;font-weight:800;line-height:1.05;margin-top:8px;max-width:640px;
-    text-shadow:0 2px 30px rgba(0,0,0,.6)}
+  #chapter h2{font-size:46px;font-weight:800;line-height:1.06;margin-top:10px;max-width:720px;
+    color:#ffffff;text-shadow:0 3px 34px rgba(0,0,0,.85),0 0 2px rgba(0,0,0,.9)}
+  #chapter .res{margin-top:14px;display:inline-block;font-size:24px;font-weight:800;letter-spacing:.3px;
+    color:#ffb570;background:rgba(255,106,0,.13);border:1px solid rgba(255,106,0,.5);
+    border-radius:10px;padding:8px 16px;text-shadow:0 0 18px rgba(255,106,0,.45)}
 
   /* subtitle / VO */
   #vo{position:absolute;z-index:6;left:40px;right:40px;bottom:180px;pointer-events:none}
@@ -172,7 +175,8 @@
 
   /* word-hits during the wall shatter */
   #hits{position:absolute;z-index:6;inset:0;display:grid;place-items:center;pointer-events:none}
-  #hits .w{font-size:76px;font-weight:800;letter-spacing:2px;color:#f8fafc;opacity:0;
+  #hits .w{font-size:66px;font-weight:800;letter-spacing:1px;color:#f8fafc;opacity:0;
+    text-align:center;max-width:920px;line-height:1.05;
     text-shadow:0 0 26px rgba(0,255,65,.45);transform:scale(.9)}
   #hits .w.on{animation:hit .85s cubic-bezier(.2,.8,.2,1)}
   @keyframes hit{0%{opacity:0;transform:scale(.82) skewX(-6deg);filter:blur(6px)}
@@ -263,6 +267,7 @@
     <div id="chapter" class="hud">
       <div class="kick mono" id="ckick">// booting</div>
       <h2 id="ctitle">De Bron &amp; Orkestratie</h2>
+      <div class="res" id="cres" style="display:none"></div>
     </div>
 
     <div id="boot">
@@ -422,41 +427,41 @@ const SCENES = [
   { shatter:true, rain:'crumble', kick:'', title:'',
     cx:540, cy:1480, sc:0.52, on:[], dur:5, vo:'' },   // muur brokkelt af + word-hits → architectuur onthuld
 
-  { kick:'// laag 0/1 — bron & kennis', title:'De Bron & de Single Source of Truth',
+  { kick:'// het begint met één scan', title:'Eén scan. De rest gaat vanzelf.', res:'0 blanco pagina’s',
     cx:540, cy:250, sc:1.02, on:['mon','trig','obs'], dur:11,
-    vo:'Eén bron: je wekelijkse recruitment-scan. De Obsidian Vault levert instructies, tone-of-voice, persona\'s en templates als single source of truth.' },
+    vo:'Het begint met één wekelijkse scan van jouw vakgebied. Meer hoef jij niet te doen — het systeem weet al hoe jouw merk klinkt en waar jouw doelgroep op zit.' },
 
-  { kick:'// laag 2 — orkestratie', title:'De Centrale Orchestrator',
+  { kick:'// alles vanuit één plek', title:'Alles geregeld vanuit één plek', res:'geen los geknutsel',
     cx:540, cy:540, sc:1.12, on:['stitch','mon','trig','obs'], dur:8,
-    vo:'Onze eigen workflow-engine orkestreert alles als centrale content-planner én state manager.' },
+    vo:'Eén centrale regisseur plant en bewaakt het hele proces. Jij hoeft niets te koppelen of in de gaten te houden — dat doet het systeem voor je.' },
 
-  { kick:'// laag 3 — model-router', title:'Dynamische Model Router',
+  { kick:'// slim én zuinig', title:'Het slimste brein, tegen de laagste kosten', res:'tot 90% goedkoper',
     cx:540, cy:940, sc:0.9, on:['router','haiku','sonnet','gemini'], dur:11,
-    vo:'De router kiest per taak het juiste én goedkoopste model — Haiku voor triage, Sonnet 5 voor code & copy, Gemini 3.1 Pro voor grote datasets.' },
+    vo:'Voor elke taak kiest het systeem automatisch het beste én goedkoopste AI-model. Zware klussen slim, simpele klussen goedkoop — jij betaalt nooit te veel.' },
 
-  { kick:'// laag 4 — tools & data', title:'Research, Media & Assembly',
+  { kick:'// tekst én beeld, klaar', title:'Tekst én beeld, in één keer klaar', res:'geen aparte designer nodig',
     cx:540, cy:1420, sc:0.88, on:['apify','leo','kling','placid','mj','supa'], dur:10,
-    vo:'Apify scrapt de concurrentie; Leonardo, Kling, Placid en Midjourney maken het beeld; Supabase voegt alles samen tot één concept.' },
+    vo:'Het systeem bekijkt de concurrentie en maakt de teksten, beelden en video’s er meteen bij. Alles kant-en-klaar, in jouw huisstijl.' },
 
-  { kick:'// laag 5 — de splitsing', title:'Eén Onderwerp, Vier Kanalen',
+  { kick:'// één onderwerp, alle kanalen', title:'Eén onderwerp, vier kanalen op maat', res:'4× bereik, 0 kopieerwerk',
     cx:540, cy:1845, sc:0.9, on:['seo','licorp','liper','meta'], dur:9,
-    vo:'Eén onderwerp wordt uniek opgesplitst in vier kanaalversies — nooit gekopieerde content.' },
+    vo:'Uit dat ene onderwerp maakt het systeem vier unieke versies: voor je website, voor LinkedIn en voor je advertenties. Nooit gekopieerd — elk kanaal krijgt z’n eigen toon.' },
 
-  { kick:'// USP — dual-track', title:'De LinkedIn Dual-Track',
+  { kick:'// meer bereik op LinkedIn', title:'Twee keer zoveel bereik op LinkedIn', res:'5–10× meer weergaven',
     cx:540, cy:1845, sc:1.24, on:['licorp','liper'], dur:11,
-    vo:'De sleutel: bedrijfspagina (autoriteit, \'wij\') én persoonlijk profiel (empathie, \'ik\', dwell time) — zo omzeil je LinkedIns straf op dubbele content.' },
+    vo:'Op LinkedIn plaatst het systeem slim vanaf je bedrijfspagina én je persoonlijke profiel. Zo bereik je veel meer mensen, zonder gedoe met dubbele content.' },
 
-  { kick:'// laag 6 — bescherming', title:'Kwaliteit, Merk & Algorithm Intelligence',
+  { kick:'// altijd binnen de regels', title:'Altijd on-brand en binnen de regels', res:'geen missers online',
     cx:540, cy:2125, sc:0.9, on:['qgate','brand','aia'], dur:12,
-    vo:'SEO-check en Brand Guardian bewaken kwaliteit; de Algorithm Intelligence Agent is een realtime immuunsysteem dat elke post aanpast aan de nieuwste Meta- en LinkedIn-regels.' },
+    vo:'Voordat er iets naar buiten gaat, controleert het systeem de kwaliteit, je huisstijl én de nieuwste regels van LinkedIn en Meta. Zo staat er nooit een misser online.' },
 
-  { kick:'// laag 7/8 — sluis & publicatie', title:'Menselijke Sluis & Publicatie',
+  { kick:'// jij houdt de controle', title:'Jij geeft akkoord. Altijd.', res:'de mens beslist, niet de AI',
     cx:540, cy:2540, sc:0.72, on:['cowork','wp','liapi','metaapi'], dur:9,
-    vo:'Jij keurt goed in de Cowork-sluis; daarna publiceert het systeem naar WordPress, LinkedIn en Meta.' },
+    vo:'Niets gaat live zonder jouw akkoord. Jij houdt de eindcontrole; pas na jouw ‘ja’ publiceert het systeem naar al je kanalen.' },
 
-  { kick:'// het vliegwiel', title:'Eén Autonoom Omnichannel Vliegwiel',
+  { kick:'// het resultaat', title:'Ruim 20 uur per week terug', res:'24/7 zichtbaar, jij aan het roer',
     cx:540, cy:1480, sc:0.5, on:NODES.map(n=>n.id), dur:9,
-    vo:'Eén scan → website, twee LinkedIn-sporen én Meta Ads. Een autonoom, zelflerend vliegwiel dat 24/7 draait.' },
+    vo:'Het resultaat: één scan wordt jouw hele week aan content, op elk kanaal. Je wint zo’n twintig uur per week — en blijft continu zichtbaar bij de juiste mensen.' },
 
   { cliff:true, rain:'full', kick:'// module 01 / ∞', title:'',
     cx:540, cy:1480, sc:0.52, on:[], dur:8, vo:'' },
@@ -568,6 +573,9 @@ function go(i,manual){
   document.getElementById('snum').textContent=String(i+1).padStart(2,'0');
   document.getElementById('ckick').textContent=s.kick;
   document.getElementById('ctitle').textContent=s.title;
+  const cres=document.getElementById('cres');
+  if(s.res){ cres.textContent=s.res; cres.style.display='inline-block'; }
+  else { cres.style.display='none'; }
   document.getElementById('votxt').textContent=s.vo;
   document.getElementById('clab').textContent='SCENE '+String(i+1).padStart(2,'0');
   // reset intro timers/state on every scene change
@@ -632,7 +640,7 @@ function runColdOpen(){ coldT.forEach(clearTimeout); coldT=[];
 let wordT=[];
 function showWords(idx){ wordT.forEach(clearTimeout); wordT=[];
   const el=document.getElementById('hitw'); if(!el) return; el.classList.remove('on'); el.textContent='';
-  const words=['GEEN FICTIE.','ÉÉN BRON.','ALLE KANALEN.','24/7 AUTONOOM.'];
+  const words=['ÉÉN SCAN.','EEN WEEK CONTENT.','ALLE KANALEN.','20+ UUR/WEEK TERUG.'];
   let t=500;
   words.forEach((w)=>{ wordT.push(setTimeout(()=>{ if(cur!==idx)return;
     el.textContent=w; el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); }, t)); t+=850; });
