@@ -2,21 +2,19 @@
 /*
  * record.js — render index.html to a 1080x1920 MP4 (Reels format).
  *
- * Drives the live animation in headless Chromium, captures PNG frames at a
- * fixed frame-rate while the presentation auto-plays through its scenes, then
- * encodes them to H.264 with ffmpeg. No cloud services, fully local.
+ * Uses Playwright's native video capture (no per-frame screenshots) to record
+ * the live presentation as it plays through every scene, then transcodes the
+ * WebM to H.264 MP4 with ffmpeg. Fully local, no cloud services.
  *
  * Usage:  node scripts/record.js [outfile.mp4]
  *
- * Deps (installed on demand, see README): playwright-core + an ffmpeg binary.
- * Resolves ffmpeg from @ffmpeg-installer/ffmpeg, ffmpeg-static, or $FFMPEG.
+ * Resolves ffmpeg from $FFMPEG, @ffmpeg-installer/ffmpeg, or ffmpeg-static.
  */
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { spawnSync } = require('child_process');
 
-// ---- resolve chromium + ffmpeg (best-effort across environments) ----
 function req(mod) { try { return require(mod); } catch { return null; } }
 const playwright =
   req('playwright') || req('playwright-core') ||
@@ -26,15 +24,14 @@ const { chromium } = playwright;
 
 function findChromium() {
   if (process.env.CHROMIUM_PATH) return process.env.CHROMIUM_PATH;
-  const roots = ['/opt/pw-browsers'];
-  for (const r of roots) {
-    if (!fs.existsSync(r)) continue;
-    for (const d of fs.readdirSync(r)) {
-      const p = path.join(r, d, 'chrome-linux', 'chrome');
+  const root = '/opt/pw-browsers';
+  if (fs.existsSync(root)) {
+    for (const d of fs.readdirSync(root)) {
+      const p = path.join(root, d, 'chrome-linux', 'chrome');
       if (fs.existsSync(p)) return p;
     }
   }
-  return undefined; // let playwright use its default
+  return undefined;
 }
 function findFfmpeg() {
   if (process.env.FFMPEG) return process.env.FFMPEG;
@@ -43,54 +40,49 @@ function findFfmpeg() {
   return 'ffmpeg';
 }
 
-// ---- config ----
+const W = 1080, H = 1920, FPS = 30;
 const OUT = process.argv[2] || path.resolve('dist/omnichannel-architecture-1080x1920.mp4');
-const FPS = 30;
 const FILE = 'file://' + path.resolve(__dirname, '..', 'index.html');
-const TRANSITION_MS = 1300; // camera ease (matches CSS 1.25s + margin)
-const DWELL_MS = 3400;      // hold per scene after the camera settles
+const TRANSITION_MS = 1300;  // camera ease (matches CSS 1.25s + margin)
+const DWELL_MS = 3400;       // hold per scene once the camera settles
 
 (async () => {
-  const frameDir = fs.mkdtempSync(path.join(os.tmpdir(), 'frames-'));
+  const vidDir = fs.mkdtempSync(path.join(os.tmpdir(), 'vid-'));
   const browser = await chromium.launch({ executablePath: findChromium() });
-  const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
+  const context = await browser.newContext({
+    viewport: { width: W, height: H },
+    recordVideo: { dir: vidDir, size: { width: W, height: H } },
+  });
+  const page = await context.newPage();
   await page.goto(FILE);
   await page.waitForFunction(() => typeof window.go === 'function');
-  // take manual control of the timeline
-  await page.evaluate(() => { window.setPlay(false); });
-  const nScenes = await page.evaluate(() => document.querySelectorAll('#dots button').length);
+  await page.evaluate(() => window.setPlay(false)); // drive the timeline ourselves
+  const n = await page.evaluate(() => document.querySelectorAll('#dots button').length);
 
-  let frame = 0;
-  const grab = async () => {
-    await page.screenshot({ path: path.join(frameDir, String(frame).padStart(5, '0') + '.png') });
-    frame++;
-  };
-  const captureFor = async (ms) => {
-    const frames = Math.round((ms / 1000) * FPS);
-    for (let i = 0; i < frames; i++) { await grab(); await page.waitForTimeout(1000 / FPS); }
-  };
-
-  for (let s = 0; s < nScenes; s++) {
-    await page.evaluate((n) => window.go(n, true), s);
-    await captureFor(TRANSITION_MS); // record the camera move + matrix rain
-    await captureFor(DWELL_MS);      // hold on the scene
+  for (let s = 0; s < n; s++) {
+    await page.evaluate((i) => window.go(i, true), s);
+    await page.waitForTimeout(TRANSITION_MS + DWELL_MS);
   }
+
+  await context.close(); // finalizes the .webm
   await browser.close();
 
-  // ---- encode ----
+  const webm = fs.readdirSync(vidDir).find(f => f.endsWith('.webm'));
+  if (!webm) { console.error('no video captured'); process.exit(1); }
+  const webmPath = path.join(vidDir, webm);
+
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   const ff = findFfmpeg();
-  console.log(`Encoding ${frame} frames @ ${FPS}fps -> ${OUT}`);
+  console.log(`Transcoding ${webm} -> ${OUT}`);
   const r = spawnSync(ff, [
-    '-y', '-framerate', String(FPS),
-    '-i', path.join(frameDir, '%05d.png'),
+    '-y', '-i', webmPath,
     '-c:v', 'libx264', '-pix_fmt', 'yuv420p',
-    '-vf', 'scale=1080:1920:flags=lanczos', '-r', String(FPS),
+    '-vf', `scale=${W}:${H}:flags=lanczos,fps=${FPS}`,
     '-movflags', '+faststart', '-crf', '20', '-preset', 'medium',
     OUT,
   ], { stdio: 'inherit' });
-  fs.rmSync(frameDir, { recursive: true, force: true });
+  fs.rmSync(vidDir, { recursive: true, force: true });
   if (r.status !== 0) { console.error('ffmpeg failed'); process.exit(1); }
   const mb = (fs.statSync(OUT).size / 1e6).toFixed(1);
-  console.log(`Done: ${OUT} (${mb} MB, ${(frame / FPS).toFixed(1)}s)`);
+  console.log(`Done: ${OUT} (${mb} MB)`);
 })().catch(e => { console.error(e); process.exit(1); });
