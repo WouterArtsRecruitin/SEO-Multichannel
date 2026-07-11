@@ -236,6 +236,12 @@
   #finaleTxt .small{margin-top:12px;font-size:16px;letter-spacing:4px;color:var(--muted);text-transform:uppercase}
 
   .hint{position:fixed;bottom:10px;left:12px;z-index:9;color:#475569;font-size:12px}
+  #soundhint{position:absolute;z-index:8;top:26px;left:50%;transform:translateX(-50%);
+    background:rgba(0,0,0,.6);border:1px solid var(--matrix);border-radius:999px;
+    padding:11px 22px;color:var(--matrix);font-size:16px;letter-spacing:2px;
+    text-shadow:0 0 10px rgba(0,255,65,.6);box-shadow:0 0 22px -4px var(--matrix);
+    animation:sh 1.5s ease-in-out infinite;cursor:pointer}
+  @keyframes sh{50%{opacity:.5}}
 </style>
 </head>
 <body>
@@ -342,6 +348,14 @@
       </div>
     </div>
     <div id="prog"><i></i></div>
+    <div id="soundhint" class="mono">🔊 tik voor geluid</div>
+
+    <!-- Voice-over (hosted). Neo = diepe Caspian-hook; NL = Orion-narratie.
+         Swap to self-contained assets/*.mp3 zodra de bestanden lokaal staan. -->
+    <audio id="aNeo" preload="auto" crossorigin="anonymous"
+      src="https://d8j0ntlcm91z4.cloudfront.net/user_3D6jAHOHLxxvsiq5soyxcSoPg98/hf_20260711_230108_5b000746-c027-4c23-a81c-ab474458a153.mp3"></audio>
+    <audio id="aNar" preload="auto" crossorigin="anonymous"
+      src="https://d8j0ntlcm91z4.cloudfront.net/user_3D6jAHOHLxxvsiq5soyxcSoPg98/hf_20260711_225643_17021d62-9470-4f0b-9608-2b2992e820d9.mp3"></audio>
   </div>
 </div>
 <div class="hint mono">← → wisselt scenes · spatie = play/pauze</div>
@@ -560,6 +574,22 @@ let cur=-1, playing=true, timer=null, tStart=0, raf=null;
 const stage=document.getElementById('stage');
 const prog=document.querySelector('#prog i');
 
+/* ---- voice-over sync (Neo hook + NL narration), scene-driven ---- */
+const aNeo=document.getElementById('aNeo'), aNar=document.getElementById('aNar');
+let neoAT=null;
+const NEO_SCENE=2, NAR_FROM=3, NAR_TO=12;      // narration runs shatter → vliegwiel
+function aStop(a){ try{ a.pause(); a.currentTime=0; }catch(e){} }
+function syncAudio(i){
+  const s=SCENES[i]; clearTimeout(neoAT);
+  // Neo line: aligned with the talking mouth (speak starts ~3.4s into the neo scene)
+  if(i===NEO_SCENE){ aStop(aNeo); if(playing) neoAT=setTimeout(()=>{ if(cur===i&&playing) aNeo.play().catch(()=>{}); }, 3200); }
+  else aStop(aNeo);
+  // NL narration: begins at the shatter reveal, keeps playing through the architecture
+  if(s.shatter){ aNar.currentTime=0; if(playing) aNar.play().catch(()=>{}); }
+  else if(i>=NAR_FROM && i<=NAR_TO){ if(playing && aNar.paused) aNar.play().catch(()=>{}); }
+  else aStop(aNar);
+}
+
 function go(i,manual){
   i=(i+SCENES.length)%SCENES.length;
   cur=i; const s=SCENES[i];
@@ -603,6 +633,7 @@ function go(i,manual){
   const vt=document.getElementById('votxt');
   vt.style.animation='none'; void vt.offsetWidth; vt.style.animation='';
   if(manual) restart();
+  syncAudio(i);
   tStart=performance.now();
 }
 function tick(now){
@@ -663,7 +694,8 @@ function showWords(idx){ wordT.forEach(clearTimeout); wordT=[];
 function setPlay(v){
   playing=v;
   document.getElementById('play').textContent=v?'⏸':'▶';
-  if(v) restart();
+  if(v){ restart(); syncAudio(cur); }
+  else { aNeo.pause(); aNar.pause(); }   // pause (keep position so resume continues)
 }
 document.getElementById('prev').onclick=()=>go(cur-1,true);
 document.getElementById('next').onclick=()=>go(cur+1,true);
@@ -673,6 +705,13 @@ addEventListener('keydown',e=>{
   else if(e.key==='ArrowLeft') go(cur-1,true);
   else if(e.key===' '){e.preventDefault(); setPlay(!playing);}
 });
+// browsers block audio until a user gesture — start it (and restart from the top) on first tap
+let audioKicked=false;
+function kickAudio(){ if(audioKicked) return; audioKicked=true;
+  const h=document.getElementById('soundhint'); if(h) h.style.display='none';
+  go(0,true);                       // replay from the top, now with sound
+}
+['pointerdown','touchstart','keydown'].forEach(ev=>addEventListener(ev,kickAudio));
 
 /* ---------- 5. MATRIX RAIN — cinematic: off → build → full → face(blink+speak) → crumble ---------- */
 const rain=document.getElementById('rain'), rctx=rain.getContext('2d');
