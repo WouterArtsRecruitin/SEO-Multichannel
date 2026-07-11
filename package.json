@@ -1,0 +1,13 @@
+{
+  "name": "omnichannel-ai-architecture",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Animated node-based architecture presentation for the Omnichannel AI Agency (Reels 1080x1920).",
+  "scripts": {
+    "record": "node scripts/record.js"
+  },
+  "devDependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "playwright-core": "^1.40.0"
+  }
+}
