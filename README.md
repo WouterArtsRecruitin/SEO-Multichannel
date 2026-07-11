@@ -34,18 +34,25 @@ Static site, geen build. `netlify.toml` staat al klaar:
 
 ## De architectuur (van A tot Z)
 
-| Fase | Node(s) | Rol |
+| Laag | Node(s) | Rol |
 |------|---------|-----|
-| **1. Bron** | Recruitment-Monitor · Obsidian Vault | Wekelijkse data-scan (.json) + merkstem/SEO-pijlers/templates als single source of truth |
-| **2. Orkestratie** | Google Stitch | Centrale Content Planner / cloud-orkestrator & state manager |
-| **3. Routing** | LiteLLM Router → Claude Haiku / Claude Sonnet 5 / Gemini 3.1 Pro | Leest Obsidian-YAML en kiest per taak het juiste model (triage / copy / long-form) |
-| **3b. Tools & data** | Apify · Leonardo/Kling · Supabase | SERP-scrape, media-generatie, concept samenvoegen & opslaan |
-| **4. Omnichannel splitsing** | SEO Blog-Writer · LinkedIn Bedrijf · LinkedIn Persoonlijk · Meta Ad Copywriter | Eén brononderwerp → vier unieke kanaalversies |
-| **5. Sluis** | Brand & Compliance · Algorithm Intelligence Agent · Cowork Wait-State | Huisstijl-check, live algoritme-check (Meta/LI) en menselijke goedkeuring |
-| **6. Publicatie** | Omnichannel Out | WordPress · LinkedIn · Meta · Buffer — plus feedback-loop terug naar Stitch |
+| **0. Bron & trigger** | Recruitment-Monitor · Cloud Trigger (+ custom input-MCP) | Wekelijkse scan van recruitment-updates → payload (.json/.md); webhook/cronjob start-signaal |
+| **1. Kennis / SSOT** | Obsidian Vault | Instructies v5 · tone of voice · buyer persona's · SEO-pijlers · templates (SSOT), gelezen als YAML |
+| **2. Orkestratie** | Google Stitch | Centrale Content Planner / SEO-Manager · cloud-workflows · state manager |
+| **3. Model-router** | LiteLLM Router → Claude Haiku / Sonnet 5 / Gemini 3.1 Pro | Leest YAML, kiest per taak het juiste én goedkoopste model (triage / code & copy / grote datasets) → executie-fase |
+| **4. Research & media** | Apify SERP · Leonardo · Kling · Placid/Bannerbear · Midjourney · Supabase | Concurrentie-scrape, beeld & video, corporate/candid visuals, concept samenvoegen & status-DB |
+| **5. Omnichannel-splitsing** | SEO Blog-Writer · LinkedIn Bedrijf (Route A) · LinkedIn Persoonlijk (Route B) · Meta Ad Copywriter | Eén onderwerp → vier unieke kanaalversies; LinkedIn **dual-track** omzeilt de straf op dubbele content |
+| **6. Kwaliteit, merk & AIA** | Interne Kwaliteits-Sluis · Brand Guardian + Compliance Counsel · Algorithm Intelligence Agent | AI SEO-check; huisstijl & compliance; realtime immuunsysteem tegen algoritme-wijzigingen |
+| **7. Menselijke sluis** | Cowork Wait-State | Stitch pauzeert tot de redacteur goedkeurt |
+| **8. Publicatie + vliegwiel** | WordPress/Webflow · LinkedIn API (Buffer/ShareIn) · Meta Marketing API | Live/ingepland; feedback-loop (statusupdate) terug naar Stitch = autonoom vliegwiel |
+
+**Agent-skills** zichtbaar in de animatie: SEO Blog-Writer — `generate_seo_structure()`,
+`create_internal_links()`; Algorithm Intelligence Agent — `update_platform_guidelines()`,
+`audit_algorithm_match()`.
 
 De oranje gestippelde lijn is de **feedback-loop**: statusupdates stromen vanuit
-de publicatie terug naar Google Stitch — het autonome vliegwiel.
+de publicatie terug naar Google Stitch — het autonome vliegwiel. Gloeiende
+data-pakketjes lopen over elke verbinding mee (incl. de feedback-kabel terug).
 
 ## Voice-over script (NL, je/jouw-vorm)
 

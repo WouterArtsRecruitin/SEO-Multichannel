@@ -54,12 +54,12 @@
 
   /* ---- the world that the camera moves over ---- */
   #world{position:absolute;top:0;left:0;z-index:3;
-    width:1080px;height:2520px;
+    width:1080px;height:2960px;
     transform-origin:0 0;
     transition:transform 1.75s cubic-bezier(.45,.02,.2,1)}
 
   /* connectors */
-  #wires{position:absolute;top:0;left:0;width:1080px;height:2520px;overflow:visible}
+  #wires{position:absolute;top:0;left:0;width:1080px;height:2960px;overflow:visible}
   .wire{fill:none;stroke:var(--line);stroke-width:2.2;opacity:.35;
     stroke-linecap:round;transition:opacity 1s ease,stroke 1s ease}
   .wire.flow{stroke-dasharray:6 10;animation:flow 1.1s linear infinite}
@@ -91,6 +91,9 @@
   .node .dot{width:9px;height:9px;border-radius:50%;background:var(--nc);
     box-shadow:0 0 10px var(--nc);animation:pulse 1.8s ease-in-out infinite}
   @keyframes pulse{50%{opacity:.35;transform:scale(.85)}}
+  .node .sk{margin-top:9px;display:flex;flex-wrap:wrap;gap:5px}
+  .node .sk span{font-family:ui-monospace,"Roboto Mono",monospace;font-size:10px;color:#7dd3fc;
+    border:1px solid rgba(125,211,252,.35);border-radius:5px;padding:2px 6px;letter-spacing:.2px}
 
   .wlabel{position:absolute;font-size:11px;letter-spacing:3px;text-transform:uppercase;
     color:var(--muted);opacity:.6}
@@ -217,7 +220,7 @@
     <div id="grid"></div>
 
     <div id="world">
-      <svg id="wires" viewBox="0 0 1080 2520" preserveAspectRatio="none">
+      <svg id="wires" viewBox="0 0 1080 2960" preserveAspectRatio="none">
         <defs>
           <marker id="arrow" markerWidth="9" markerHeight="9" refX="6" refY="3"
             orient="auto" markerUnits="strokeWidth">
@@ -319,75 +322,112 @@ const C = { green:'#22c55e', purple:'#a855f7', blue:'#3b82f6', sky:'#38bdf8',
   orange:'#f97316', pink:'#ec4899', red:'#ef4444', cyan:'#22d3ee', emerald:'#10b981' };
 
 const NODES = [
-  {id:'mon',   c:C.green,  ic:'📡', hd:'Recruitment-Monitor', b:'Wekelijkse data-scan (.json)',        s:'Payload actief',   x:90,  y:120,  w:380,h:150},
-  {id:'obs',   c:C.purple, ic:'🔮', hd:'Obsidian Vault',      b:'Merkstem · SEO-pijlers · templates (SSOT)', s:'Lokale sync', x:610, y:120,  w:380,h:150},
-  {id:'stitch',c:C.blue,   ic:'☁️', hd:'Google Stitch',       b:'Centrale Content Planner · Orkestrator',    s:'State manager',x:330, y:390,  w:420,h:160},
-  {id:'router',c:C.orange, ic:'🔀', hd:'LiteLLM Router',      b:'Leest Obsidian-YAML · dynamische taakverdeling', s:'AI processing', x:330,y:670,w:420,h:160},
-  {id:'haiku', c:C.orange, ic:'⚡', hd:'Claude Haiku',        b:'Triage · meta-titels · slugs',              s:'Snel & goedkoop', x:50, y:950, w:300,h:160},
-  {id:'sonnet',c:C.orange, ic:'🎯', hd:'Claude Sonnet 5',     b:'Outline · code · copywriting',              s:'Hoge precisie',  x:390,y:950, w:300,h:160},
-  {id:'gemini',c:C.orange, ic:'🧠', hd:'Gemini 3.1 Pro',      b:'Long-form · grote datasets (RAG)',          s:'Groot geheugen', x:730,y:950, w:300,h:160},
-  {id:'apify', c:C.cyan,   ic:'🕷️', hd:'Apify · SERP',        b:'Scrapt top-10 concurrenten',                s:'Research',       x:50, y:1230,w:300,h:150},
-  {id:'media', c:C.pink,   ic:'🎨', hd:'Leonardo / Kling',    b:'Featured images & video',                   s:'Genereren',      x:390,y:1230,w:300,h:150},
-  {id:'supa',  c:C.purple, ic:'🗄️', hd:'Supabase',            b:'Database · storage · concept samenvoegen',  s:'Online',         x:730,y:1230,w:300,h:150},
-  {id:'seo',   c:C.green,  ic:'📝', hd:'SEO Blog-Writer',     b:'Website · interne links',                   s:'Informatief',    x:40, y:1520,w:242,h:180},
-  {id:'licorp',c:C.blue,   ic:'🏢', hd:'LinkedIn Bedrijf',    b:'B2B-carrousels (Placid)',                   s:'Autoriteit',     x:300,y:1520,w:242,h:180},
-  {id:'liper', c:C.sky,    ic:'👤', hd:'LinkedIn Persoonlijk',b:'H2H · dwell time · candid',                 s:'Empathie',       x:560,y:1520,w:242,h:180},
-  {id:'meta',  c:C.orange, ic:'🎯', hd:'Meta Ad Copywriter',  b:'Leadgen & sollicitanten',                   s:'Actiegericht',   x:820,y:1520,w:242,h:180},
-  {id:'brand', c:C.red,    ic:'🛡️', hd:'Brand & Compliance',  b:'Controleert toon & huisstijl',              s:'Check',          x:210,y:1810,w:300,h:150},
-  {id:'aia',   c:C.cyan,   ic:'🧬', hd:'Algorithm Intelligence', b:'Live algoritme-check Meta / LinkedIn',   s:'Beschermt bereik',x:560,y:1810,w:320,h:150},
-  {id:'cowork',c:C.red,    ic:'⏸️', hd:'Cowork Wait-State',   b:'Menselijke review · goedkeuring',           s:'Wacht op review',x:330,y:2070,w:420,h:150},
-  {id:'out',   c:C.emerald,ic:'🚀', hd:'Omnichannel Out',     b:'WordPress · LinkedIn · Meta · Buffer',      s:'Live',           x:330,y:2330,w:420,h:160},
+  // ── Laag 0 · Bron & trigger ─────────────────────────────
+  {id:'mon',   c:C.green,  ic:'📡', hd:'Recruitment-Monitor', b:'Wekelijkse scan van recruitment-updates → payload (.json / .md)', s:'Bron · brandstof', x:40, y:110, w:320,h:170},
+  {id:'trig',  c:C.green,  ic:'⚡', hd:'Cloud Trigger',       b:'Webhook of cronjob start de workflow',      s:'Start-signaal',  x:400,y:110, w:280,h:170},
+  {id:'obs',   c:C.purple, ic:'🔮', hd:'Obsidian Vault',      b:'Instructies v5 · tone of voice · buyer persona\'s · SEO-pijlers · templates (SSOT)', s:'Leest YAML · lokale sync', x:720,y:110, w:320,h:170},
+  // ── Laag 2 · Orkestratie ────────────────────────────────
+  {id:'stitch',c:C.blue,   ic:'☁️', hd:'Google Stitch',       b:'Centrale Content Planner / SEO-Manager · centrale cloud-workflows', s:'State manager · orkestrator', x:330,y:420,w:420,h:170},
+  // ── Laag 3 · Dynamische model-router ────────────────────
+  {id:'router',c:C.orange, ic:'🔀', hd:'LiteLLM Router',      b:'Leest Obsidian-YAML · kiest model per taak → executie-fase', s:'Dynamische routing', x:330,y:720,w:420,h:160},
+  {id:'haiku', c:C.orange, ic:'⚡', hd:'Claude Haiku',        b:'Triage & filtering',                        s:'Snel & goedkoop', x:40, y:980, w:300,h:150},
+  {id:'sonnet',c:C.orange, ic:'🎯', hd:'Claude Sonnet 5',     b:'Code & copywriting',                        s:'Hoge precisie',  x:390,y:980, w:300,h:150},
+  {id:'gemini',c:C.orange, ic:'🧠', hd:'Gemini 3.1 Pro',      b:'Grote datasets (PDF/CSV) · RAG',            s:'Groot geheugen', x:740,y:980, w:300,h:150},
+  // ── Laag 4 · Research & media tool stack ────────────────
+  {id:'apify', c:C.cyan,   ic:'🕷️', hd:'Apify · SERP',        b:'Scrapt top-10 concurrenten · zoekintentie, word-count, LSI', s:'SERP-research', x:40, y:1250,w:300,h:150},
+  {id:'leo',   c:C.pink,   ic:'🎨', hd:'Leonardo AI',         b:'Featured images',                           s:'Beeld',          x:390,y:1250,w:300,h:150},
+  {id:'kling', c:C.pink,   ic:'🎬', hd:'Kling',               b:'Video-generatie',                           s:'Beweging',       x:740,y:1250,w:300,h:150},
+  {id:'placid',c:C.blue,   ic:'📊', hd:'Placid / Bannerbear', b:'Carrousels & infographics in huisstijl',    s:'Corporate visuals',x:40, y:1430,w:300,h:150},
+  {id:'mj',    c:C.sky,    ic:'📸', hd:'Midjourney-agent',    b:'Ultra-realistische candid fotografie',      s:'Personal visuals',x:390,y:1430,w:300,h:150},
+  {id:'supa',  c:C.purple, ic:'🗄️', hd:'Supabase',            b:'Concept samenvoegen · database & storage · status-DB', s:'Assembly · online', x:740,y:1430,w:300,h:150},
+  // ── Laag 5 · Omnichannel content-splitsing ──────────────
+  {id:'seo',   c:C.green,  ic:'📝', hd:'SEO Blog-Writer',     b:'Long-form artikel · informatief → WordPress/Webflow', s:'Route 1 · Website', sk:['generate_seo_structure()','create_internal_links()'], x:20, y:1730,w:250,h:230},
+  {id:'licorp',c:C.blue,   ic:'🏢', hd:'LinkedIn · Bedrijf',  b:'Corporate & autoriteit · data-gedreven · \'wij\' · carrousels/PDF', s:'Route A · nieuwswaarde', x:283,y:1730,w:250,h:230},
+  {id:'liper', c:C.sky,    ic:'👤', hd:'LinkedIn · Persoonlijk',b:'Thought leadership · \'ik\' · candid · dwell time (5–10× bereik)', s:'Route B · empathie', x:546,y:1730,w:250,h:230},
+  {id:'meta',  c:C.orange, ic:'🎯', hd:'Meta Ad Copywriter',  b:'Actiegericht · leadgen & sollicitanten · carrousel', s:'Route 3 · Ads', x:809,y:1730,w:250,h:230},
+  // ── Laag 6 · Kwaliteit, merk & algoritme-bescherming ────
+  {id:'qgate', c:C.emerald,ic:'✅', hd:'Kwaliteits-Sluis',    b:'AI SEO-check · keyword-density · interne links · leesbaarheid', s:'Automatische QA', x:40, y:2040,w:300,h:170},
+  {id:'brand', c:C.red,    ic:'🛡️', hd:'Brand & Compliance',  b:'Brand Guardian + Compliance Counsel · huisstijl & Meta/LI-regels', s:'Merk & compliance', x:390,y:2040,w:300,h:170},
+  {id:'aia',   c:C.cyan,   ic:'🧬', hd:'Algorithm Intelligence', b:'Scant dev-blogs Meta/LinkedIn · realtime immuunsysteem', sk:['update_platform_guidelines()','audit_algorithm_match()'], s:'Beschermt bereik', x:740,y:2040,w:300,h:170},
+  // ── Laag 7 · Menselijke sluis ───────────────────────────
+  {id:'cowork',c:C.red,    ic:'⏸️', hd:'Cowork Wait-State',   b:'Stitch pauzeert · redacteur keurt goed',    s:'Menselijke sluis', x:330,y:2320,w:420,h:150},
+  // ── Laag 8 · Publicatie + vliegwiel ─────────────────────
+  {id:'wp',    c:C.emerald,ic:'🌐', hd:'WordPress / Webflow', b:'Blog live via API',                         s:'Website',        x:40, y:2600,w:300,h:150},
+  {id:'liapi', c:C.blue,   ic:'💼', hd:'LinkedIn API',        b:'Inplannen (Buffer/ShareIn) · link-in-comments', s:'Bedrijf + persoonlijk', x:390,y:2600,w:300,h:150},
+  {id:'metaapi',c:C.orange,ic:'📣', hd:'Meta Marketing API',  b:'Ad-concept klaargezet',                     s:'Meta Ads',       x:740,y:2600,w:300,h:150},
 ];
 const N = Object.fromEntries(NODES.map(n=>[n.id,n]));
 
 const WIRES = [
-  ['mon','stitch'],['obs','stitch'],
+  // inputs → orchestrator
+  ['mon','stitch',{lab:'input-mcp'}],['trig','stitch'],['obs','stitch'],
+  // orchestrator → router → models
   ['stitch','router'],
-  ['router','haiku',{lab:'triage'}],['router','sonnet',{lab:'copy'}],['router','gemini',{lab:'longform'}],
-  ['stitch','apify'],['stitch','media'],
-  ['haiku','supa'],['sonnet','supa'],['gemini','supa'],['apify','supa'],['media','supa'],
+  ['router','haiku',{lab:'triage'}],['router','sonnet',{lab:'copy'}],['router','gemini',{lab:'data'}],
+  ['haiku','supa'],['sonnet','supa'],['gemini','supa'],
+  // orchestrator → tool stack → assembly
+  ['stitch','apify'],['stitch','leo'],['stitch','kling'],['stitch','placid'],['stitch','mj'],
+  ['apify','supa'],['leo','supa'],['kling','supa'],['placid','supa'],['mj','supa'],
+  // assembly → channels (+ tool→channel specialisation)
   ['supa','seo'],['supa','licorp'],['supa','liper'],['supa','meta'],
-  ['seo','brand'],['licorp','brand'],['liper','brand'],['meta','brand'],
-  ['brand','aia'],['aia','cowork'],['cowork','out'],
-  ['out','stitch',{feedback:true}],
+  ['placid','licorp'],['mj','liper'],
+  // channels → quality → brand → AIA → human gate
+  ['seo','qgate'],['licorp','qgate'],['liper','qgate'],['meta','qgate'],
+  ['qgate','brand'],['brand','aia'],['aia','cowork'],
+  // human gate → publish
+  ['cowork','wp'],['cowork','liapi'],['cowork','metaapi'],
+  // feedback flywheel
+  ['metaapi','stitch',{feedback:true}],
 ];
 
 /* ---------- 2. SCENES (camera + narration) ---------- */
 const F_W=1080, F_H=1920;
 const SCENES = [
   { boot:true, kick:'// booting', title:'',
-    cx:540, cy:1290, sc:0.60, on:[], dur:4.5, vo:'' },
+    cx:540, cy:1480, sc:0.52, on:[], dur:4.5, vo:'' },
 
   { brand:true, kick:'// system online', title:'Recruitin · AI Agency',
-    cx:540, cy:1290, sc:0.60, on:[], dur:8,
-    vo:'Wat als één brononderwerp automatisch je hele contentmachine voedt? Dit is het Omnichannel AI Content OS van Recruitin.' },
+    cx:540, cy:1480, sc:0.52, on:[], dur:8,
+    vo:'Omnichannel AI Content OS — de contentmotor van Recruitin.' },
 
-  { kick:'// fase 01 — input', title:'De Bron & Orkestratie',
-    cx:540, cy:340, sc:1.12, on:['mon','obs','stitch'], dur:13,
-    vo:'Alles start bij de bron. Jouw wekelijkse recruitment-scan stroomt als data direct de Centrale Content Planner — Google Stitch — binnen. De Obsidian Vault levert merkstem, SEO-pijlers en templates als single source of truth.' },
+  { kick:'// laag 0/1 — bron & kennis', title:'De Bron & de Single Source of Truth',
+    cx:540, cy:250, sc:1.02, on:['mon','trig','obs'], dur:13,
+    vo:'Eén bron: je wekelijkse recruitment-scan. De Obsidian Vault levert instructies, tone-of-voice, persona\'s en templates als single source of truth.' },
 
-  { kick:'// fase 02 — routing', title:'De Dynamische Model Router',
-    cx:540, cy:870, sc:0.95, on:['router','haiku','sonnet','gemini'], dur:13,
-    vo:'De Router leest de Obsidian-YAML en kiest per taak het juiste brein: Claude Haiku voor snelle triage, Claude Sonnet 5 voor precieze copy en code, en Gemini 3.1 Pro voor long-form en grote datasets.' },
+  { kick:'// laag 2 — orkestratie', title:'Google Stitch · de Orkestrator',
+    cx:540, cy:540, sc:1.12, on:['stitch','mon','trig','obs'], dur:11,
+    vo:'Google Stitch orkestreert alles als centrale content-planner én state manager.' },
 
-  { kick:'// fase 03 — tools & data', title:'Research, Media & Opslag',
-    cx:540, cy:1300, sc:1.05, on:['apify','media','supa'], dur:10,
-    vo:'Parallel scrapt Apify de top-10 concurrenten, genereert Leonardo de beelden, en voegt Supabase alle losse elementen samen tot één compleet concept-artikel.' },
+  { kick:'// laag 3 — model-router', title:'Dynamische Model Router',
+    cx:540, cy:940, sc:0.9, on:['router','haiku','sonnet','gemini'], dur:14,
+    vo:'De router kiest per taak het juiste én goedkoopste model — Haiku voor triage, Sonnet 5 voor code & copy, Gemini 3.1 Pro voor grote datasets.' },
 
-  { kick:'// fase 04 — de splitsing', title:'De Omnichannel Splitsing',
-    cx:540, cy:1610, sc:0.98, on:['seo','licorp','liper','meta'], dur:14,
-    vo:'Hier gebeurt de magie: één brononderwerp wordt uniek opgesplitst. Een SEO-blog voor je website, een B2B-carrousel voor je bedrijfspagina, een persoonlijk verhaal voor je profiel én actiegerichte Meta Ads.' },
+  { kick:'// laag 4 — tools & data', title:'Research, Media & Assembly',
+    cx:540, cy:1420, sc:0.88, on:['apify','leo','kling','placid','mj','supa'], dur:14,
+    vo:'Apify scrapt de concurrentie; Leonardo, Kling, Placid en Midjourney maken het beeld; Supabase voegt alles samen tot één concept.' },
 
-  { kick:'// fase 05 — de sluis', title:'Compliance & Algorithm Intelligence',
-    cx:540, cy:1970, sc:0.92, on:['brand','aia','cowork'], dur:14,
-    vo:'Voordat er iets live gaat bewaakt de Brand Guardian je huisstijl, en scant de Algorithm Intelligence Agent realtime de regels van Meta en LinkedIn. Daarna wacht het systeem op jouw akkoord in de Cowork-sluis.' },
+  { kick:'// laag 5 — de splitsing', title:'Eén Onderwerp, Vier Kanalen',
+    cx:540, cy:1845, sc:0.9, on:['seo','licorp','liper','meta'], dur:13,
+    vo:'Eén onderwerp wordt uniek opgesplitst in vier kanaalversies — nooit gekopieerde content.' },
 
-  { kick:'// fase 06 — het vliegwiel', title:'Publicatie & Het Vliegwiel',
-    cx:540, cy:1290, sc:0.60, on:NODES.map(n=>n.id), finale:true, dur:14,
-    vo:'Na goedkeuring publiceert het systeem volautomatisch naar al je kanalen. Het resultaat: een autonoom, omnichannel vliegwiel dat 24/7 jouw autoriteit bouwt en leads converteert. Welkom in de matrix.' },
+  { kick:'// USP — dual-track', title:'De LinkedIn Dual-Track',
+    cx:540, cy:1845, sc:1.24, on:['licorp','liper'], dur:15,
+    vo:'De sleutel: bedrijfspagina (autoriteit, \'wij\') én persoonlijk profiel (empathie, \'ik\', dwell time) — zo omzeil je LinkedIns straf op dubbele content.' },
+
+  { kick:'// laag 6 — bescherming', title:'Kwaliteit, Merk & Algorithm Intelligence',
+    cx:540, cy:2125, sc:0.9, on:['qgate','brand','aia'], dur:15,
+    vo:'SEO-check en Brand Guardian bewaken kwaliteit; de Algorithm Intelligence Agent is een realtime immuunsysteem dat elke post aanpast aan de nieuwste Meta- en LinkedIn-regels.' },
+
+  { kick:'// laag 7/8 — sluis & publicatie', title:'Menselijke Sluis & Publicatie',
+    cx:540, cy:2540, sc:0.72, on:['cowork','wp','liapi','metaapi'], dur:14,
+    vo:'Jij keurt goed in de Cowork-sluis; daarna publiceert het systeem naar WordPress, LinkedIn en Meta.' },
+
+  { kick:'// het vliegwiel', title:'Eén Autonoom Omnichannel Vliegwiel',
+    cx:540, cy:1480, sc:0.5, on:NODES.map(n=>n.id), dur:12,
+    vo:'Eén scan → website, twee LinkedIn-sporen én Meta Ads. Een autonoom, zelflerend vliegwiel dat 24/7 draait.' },
 
   { cliff:true, kick:'// module 01 / ∞', title:'',
-    cx:540, cy:1290, sc:0.60, on:[], dur:9, vo:'' },
+    cx:540, cy:1480, sc:0.52, on:[], dur:9, vo:'' },
 ];
 window.SCENE_DUR = SCENES.map(s => s.dur || 8); // seconds per scene, read by the recorder
 
@@ -427,7 +467,7 @@ WIRES.forEach(([a,b,o],i)=>{
 
   // travelling data packets — 2 per wire, staggered, with wire-varying frequency
   const fb=!!o.feedback;
-  const dots = fb ? 1 : 2;
+  const dots = 1;
   for(let k=0;k<dots;k++){
     const c=document.createElementNS(SVGNS,'circle');
     c.setAttribute('r', fb ? 6 : 5);
@@ -461,6 +501,7 @@ NODES.forEach(n=>{
   d.style.cssText+=`left:${n.x}px;top:${n.y}px;width:${n.w}px;min-height:${n.h}px;--nc:${n.c}`;
   d.innerHTML=`<div class="h"><span class="ic">${n.ic}</span>${n.hd}</div>
     <div class="b">${n.b}</div>
+    ${n.sk?`<div class="sk">${n.sk.map(x=>`<span>${x}</span>`).join('')}</div>`:''}
     <div class="s mono"><span class="dot"></span>${n.s}</div>`;
   world.appendChild(d); nodeEls[n.id]=d;
 });
