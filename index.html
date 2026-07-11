@@ -40,10 +40,8 @@
     box-shadow:0 0 120px rgba(0,255,65,.05) inset;
   }
 
-  /* ---- matrix rain ---- */
-  #rain{position:absolute;inset:0;z-index:1;opacity:.22;transition:opacity 1.4s ease}
-  #stage.finale #rain{opacity:.5}
-  #stage.boot #rain,#stage.cliff #rain{opacity:.92}
+  /* ---- matrix rain (intensity is JS-driven per phase) ---- */
+  #rain{position:absolute;inset:0;z-index:1;opacity:1}
   /* vignette + grid overlay */
   #grid{position:absolute;inset:0;z-index:2;pointer-events:none;
     background-image:linear-gradient(rgba(51,65,85,.10) 1px,transparent 1px),
@@ -56,7 +54,9 @@
   #world{position:absolute;top:0;left:0;z-index:3;
     width:1080px;height:2960px;
     transform-origin:0 0;
-    transition:transform 1.75s cubic-bezier(.45,.02,.2,1)}
+    transition:transform 1.75s cubic-bezier(.45,.02,.2,1),opacity 1.2s ease}
+  /* during the cinematic intro (countdown → rain → Neo → logo) the architecture is hidden */
+  #stage.boot #world,#stage.matrix #world,#stage.intro #world{opacity:0}
 
   /* connectors */
   #wires{position:absolute;top:0;left:0;width:1080px;height:2960px;overflow:visible}
@@ -101,6 +101,7 @@
   /* ---- fixed HUD (does not move with camera) ---- */
   .hud{position:absolute;z-index:6;pointer-events:none;transition:opacity 1s ease}
   #stage.boot #top,#stage.boot #chapter,#stage.boot #vo,
+  #stage.matrix #top,#stage.matrix #chapter,#stage.matrix #vo,
   #stage.cliff #top,#stage.cliff #chapter,#stage.cliff #vo{opacity:0}
   #top{top:0;left:0;right:0;padding:34px 40px;display:flex;justify-content:space-between;align-items:flex-start}
   #brand{display:flex;align-items:center;gap:14px}
@@ -383,11 +384,14 @@ const WIRES = [
 /* ---------- 2. SCENES (camera + narration) ---------- */
 const F_W=1080, F_H=1920;
 const SCENES = [
-  { boot:true, kick:'// booting', title:'',
-    cx:540, cy:1480, sc:0.52, on:[], dur:4.5, vo:'' },
+  { boot:true, rain:'off', kick:'// booting', title:'',
+    cx:540, cy:1480, sc:0.52, on:[], dur:3.6, vo:'' },
 
-  { brand:true, kick:'// system online', title:'Recruitin · AI Agency',
-    cx:540, cy:1480, sc:0.52, on:[], dur:8,
+  { matrix:true, rain:'build', kick:'', title:'',
+    cx:540, cy:1480, sc:0.52, on:[], dur:10, vo:'' },
+
+  { brand:true, rain:'full', kick:'// system online', title:'Recruitin · AI Agency',
+    cx:540, cy:1480, sc:0.52, on:[], dur:6,
     vo:'Omnichannel AI Content OS — de contentmotor van Recruitin.' },
 
   { kick:'// laag 0/1 — bron & kennis', title:'De Bron & de Single Source of Truth',
@@ -426,7 +430,7 @@ const SCENES = [
     cx:540, cy:1480, sc:0.5, on:NODES.map(n=>n.id), dur:12,
     vo:'Eén scan → website, twee LinkedIn-sporen én Meta Ads. Een autonoom, zelflerend vliegwiel dat 24/7 draait.' },
 
-  { cliff:true, kick:'// module 01 / ∞', title:'',
+  { cliff:true, rain:'full', kick:'// module 01 / ∞', title:'',
     cx:540, cy:1480, sc:0.52, on:[], dur:9, vo:'' },
 ];
 window.SCENE_DUR = SCENES.map(s => s.dur || 8); // seconds per scene, read by the recorder
@@ -542,7 +546,9 @@ function go(i,manual){
   stage.classList.toggle('intro',!!s.brand);
   stage.classList.toggle('boot',!!s.boot);
   stage.classList.toggle('cliff',!!s.cliff);
+  stage.classList.toggle('matrix',!!s.matrix);
   if(s.boot) runCountdown((s.dur||4.5)*1000);
+  setRain(s.rain || 'dim');
   [...dots.children].forEach((b,bi)=>b.classList.toggle('a',bi===i));
   // subtitle re-animate
   const vt=document.getElementById('votxt');
@@ -592,30 +598,107 @@ addEventListener('keydown',e=>{
   else if(e.key===' '){e.preventDefault(); setPlay(!playing);}
 });
 
-/* ---------- 5. MATRIX RAIN ---------- */
+/* ---------- 5. MATRIX RAIN — phased: off → build → full → face-morph ---------- */
 const rain=document.getElementById('rain'), rctx=rain.getContext('2d');
-const CH='アカサタナハマヤラワイキシチニヒミリウクスツヌフムユルエケセテネヘメレオコソトノホモヨロ0123456789$+=*/<>█▓'.split('');
-let cols,drops,fs=22;
+const CH=('アカサタナハマヤラワイキシチニヒミリウクスツヌフムユルエケセテネヘメレオコソトノホモヨロ'
+  +'ﾊﾐﾋｰｳｼﾅﾓﾆｻﾜﾂｵﾘｱﾎﾃﾏｹﾒｴｶｷﾑﾕﾗｾﾈｽﾀﾇﾉ0123456789$+=*/<>¦｜╌█▓').split('');
+const FS=22;
+let RCOLS, drops, colOn, colSpd;
 function rinit(){
   rain.width=F_W; rain.height=F_H;
-  cols=Math.floor(F_W/fs);
-  drops=Array.from({length:cols},()=>Math.random()*-60);
-}
-rinit();
-function rdraw(){
-  rctx.fillStyle='rgba(5,7,10,.10)';
-  rctx.fillRect(0,0,F_W,F_H);
-  rctx.font=fs+'px "Courier New",monospace';
-  for(let i=0;i<cols;i++){
-    const ch=CH[Math.floor(Math.random()*CH.length)];
-    const x=i*fs, y=drops[i]*fs;
-    rctx.fillStyle= Math.random()>0.975 ? '#c7ffd6' : '#00ff41';
-    rctx.fillText(ch,x,y);
-    if(y>F_H && Math.random()>0.975) drops[i]=0;
-    drops[i]+= 0.55 + Math.random()*0.5;
+  RCOLS=Math.ceil(F_W/FS)+1;
+  drops=[]; colOn=[]; colSpd=[];
+  for(let i=0;i<RCOLS;i++){
+    drops[i]=Math.random()*-90;
+    colOn[i]=Math.random();            // build-in threshold → varying spacing/frequency
+    colSpd[i]=0.4+Math.random()*0.8;   // varying fall speed
   }
 }
-setInterval(rdraw,55);
+rinit();
+
+/* ---- stylized "Neo" luminance mask (offscreen, sampled by the rain) ---- */
+let FACE=null;
+(function buildFace(){
+  const c=document.createElement('canvas'); c.width=F_W; c.height=F_H;
+  const g=c.getContext('2d');
+  const cx=F_W/2, cy=F_H*0.44;
+  const rr=(x,y,w,h,r)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);
+    g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();g.fill();};
+  g.filter='blur(8px)';
+  // lit face oval
+  const rg=g.createRadialGradient(cx,cy-30,30,cx,cy+30,350);
+  rg.addColorStop(0,'#fff'); rg.addColorStop(.6,'rgba(255,255,255,.62)'); rg.addColorStop(1,'rgba(255,255,255,0)');
+  g.save(); g.beginPath(); g.ellipse(cx,cy,235,325,0,0,7); g.clip();
+  g.fillStyle=rg; g.fillRect(0,0,F_W,F_H); g.restore();
+  // hair cap
+  g.fillStyle='rgba(255,255,255,.5)';
+  g.beginPath(); g.ellipse(cx,cy-215,225,155,0,Math.PI,2*Math.PI); g.fill();
+  g.fillRect(cx-225,cy-215,450,70);
+  // shoulders hint
+  g.fillStyle='rgba(255,255,255,.3)';
+  rr(cx-190,cy+305,380,150,60);
+  // sunglasses — cut out → dark band = the Neo signature
+  g.filter='blur(3px)';
+  g.globalCompositeOperation='destination-out';
+  g.fillStyle='#000';
+  rr(cx-205,cy-45,170,100,36);
+  rr(cx+35,cy-45,170,100,36);
+  g.fillRect(cx-42,cy-18,84,24);
+  g.globalCompositeOperation='source-over';
+  FACE=g.getImageData(0,0,F_W,F_H).data;
+})();
+function faceLum(x,y){ if(!FACE)return 0; x|=0;y|=0;
+  if(x<0||y<0||x>=F_W||y>=F_H)return 0; return FACE[(y*F_W+x)*4]/255; }
+
+/* ---- phase state ---- */
+let rainMode='dim', buildP=1, faceP=0, buildT=1, faceT=0, faceTimer=null;
+function setRain(mode){
+  if(faceTimer){clearTimeout(faceTimer); faceTimer=null;}
+  if(mode==='off'){ rainMode='off'; buildP=1;buildT=1; faceP=0;faceT=0; }
+  else if(mode==='build'){ rainMode='build'; buildP=0;buildT=1; faceP=0;faceT=0;
+    faceTimer=setTimeout(()=>{ rainMode='full'; faceT=1; }, 4600); } // build → then morph face
+  else if(mode==='face'){ rainMode='full'; buildP=1;buildT=1; faceT=1; }
+  else if(mode==='dim'){ rainMode='dim'; buildP=1;buildT=1; faceT=0; }
+  else { rainMode='full'; buildP=1;buildT=1; faceT=0; }            // 'full' — rain runs, face dissolves
+}
+
+function rdraw(){
+  buildP += (buildT-buildP)*0.024;
+  faceP  += (faceT-faceP)*(faceT>faceP?0.018:0.06);  // slow morph-in, quicker dissolve
+  if(rainMode==='build' && buildP>0.985) rainMode='full';
+  const dim = rainMode==='dim';
+  rctx.fillStyle = dim ? 'rgba(5,7,10,.20)' : 'rgba(5,7,10,.085)';
+  rctx.fillRect(0,0,F_W,F_H);
+  if(rainMode==='off' && faceP<0.02) return;
+  rctx.font=FS+'px "Courier New",monospace';
+  if(rainMode!=='off'){
+    for(let i=0;i<RCOLS;i++){
+      if(rainMode==='build' && colOn[i]>buildP) continue;
+      const x=i*FS, y=drops[i]*FS;
+      const ch=CH[(Math.random()*CH.length)|0];
+      const head=Math.random()>0.965;
+      rctx.fillStyle = head ? 'rgba(199,255,214,'+(dim?0.55:1)+')'
+                            : 'rgba(0,255,65,'+(dim?0.4:0.9)+')';
+      rctx.fillText(ch,x,y);
+      if(y>F_H && Math.random()>0.975) drops[i]=0;
+      drops[i]+= colSpd[i]*(dim?0.8:1);
+    }
+  }
+  // face-reveal layer — bright chars trace the Neo mask
+  if(faceP>0.02){
+    for(let gy=FS; gy<F_H; gy+=FS){
+      for(let gx=0; gx<F_W; gx+=FS){
+        const lum=faceLum(gx,gy);
+        if(lum<0.16) continue;
+        const a=Math.min(1, lum*faceP*1.4);
+        const ch=CH[(Math.random()*CH.length)|0];
+        rctx.fillStyle = lum>0.62 ? 'rgba(216,255,226,'+a+')' : 'rgba(74,255,128,'+(a*0.9)+')';
+        rctx.fillText(ch,gx,gy);
+      }
+    }
+  }
+}
+setInterval(rdraw,45);
 
 /* ---------- 6. FIT STAGE TO VIEWPORT ---------- */
 function fit(){
