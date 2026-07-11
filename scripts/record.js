@@ -77,13 +77,19 @@ const DWELL_MS = 3400;       // hold per scene once the camera settles
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   const ff = findFfmpeg();
   console.log(`Transcoding ${webm} -> ${OUT}`);
-  const r = spawnSync(ff, [
+  // source is already W×H from recordVideo — skip the (memory-heavy, flaky) lanczos rescale
+  const args = [
     '-y', '-i', webmPath,
     '-c:v', 'libx264', '-pix_fmt', 'yuv420p',
-    '-vf', `scale=${W}:${H}:flags=lanczos,fps=${FPS}`,
+    '-vf', `fps=${FPS}`,
     '-movflags', '+faststart', '-crf', '20', '-preset', 'medium',
     OUT,
-  ], { stdio: 'inherit' });
+  ];
+  let r = spawnSync(ff, args, { stdio: 'inherit' });
+  if (r.status !== 0) {           // one retry — the transcode occasionally crashes on first spawn
+    console.error('ffmpeg failed, retrying once…');
+    r = spawnSync(ff, args, { stdio: 'inherit' });
+  }
   fs.rmSync(vidDir, { recursive: true, force: true });
   if (r.status !== 0) { console.error('ffmpeg failed'); process.exit(1); }
   const mb = (fs.statSync(OUT).size / 1e6).toFixed(1);
