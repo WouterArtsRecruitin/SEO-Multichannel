@@ -84,6 +84,26 @@ scène tussen haakjes.
 Callum of Marcus), Stability ± 35%. Forceer pauzes tussen scènes met
 `<break time="1.0s" />` om de VO exact op de camera-overgangen te synchroniseren.
 
+## Video-export (MP4) — voor ElevenLabs / CapCut
+
+`scripts/record.js` rendert de animatie naar een kant-en-klare **1080×1920 H.264 MP4**
+(Reels-formaat) die je naast de ElevenLabs voice-over kunt leggen. Playwright speelt
+de live-animatie af en legt frames vast; ffmpeg codeert ze tot een MP4.
+
+```bash
+# eenmalig: dependencies
+npm install                       # playwright-core + @ffmpeg-installer/ffmpeg
+npx playwright install chromium   # of laat CHROMIUM_PATH wijzen naar een bestaande build
+
+# renderen -> dist/omnichannel-architecture-1080x1920.mp4
+node scripts/record.js [uitvoer.mp4]
+```
+
+Instellingen bovenaan `scripts/record.js`: `FPS`, `TRANSITION_MS` (duur van de
+camera-beweging per scène) en `DWELL_MS` (hoe lang elke scène blijft staan). De
+totale videolengte = `nScenes × (TRANSITION_MS + DWELL_MS)`. De MP4 heeft geen
+audio — de voice-over voeg je toe in je editor of ElevenLabs.
+
 ## Aanpassen
 
 Alle content zit bovenaan het `<script>`-blok in `index.html`:
