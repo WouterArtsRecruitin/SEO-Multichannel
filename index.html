@@ -417,7 +417,7 @@ const SCENES = [
     cx:540, cy:1480, sc:0.52, on:[], dur:6, vo:'' },
 
   { neo:true, rain:'face', kick:'', title:'',
-    cx:540, cy:1480, sc:0.52, on:[], dur:8, vo:'' },   // Neo morpht, knippert & zegt "Welcome to the Matrix"
+    cx:540, cy:1480, sc:0.52, on:[], dur:9.5, vo:'' },   // Neo morpht & zegt "Welcome to the Matrix"
 
   { shatter:true, rain:'crumble', kick:'', title:'',
     cx:540, cy:1480, sc:0.52, on:[], dur:5, vo:'' },   // muur brokkelt af + word-hits → architectuur onthuld
@@ -581,7 +581,7 @@ function go(i,manual){
   // architecture hidden through the cinematic intro; revealed as the wall shatters
   world.style.opacity = (cine && !s.shatter) ? '0' : '1';
   if(s.coldopen) runColdOpen();
-  if(s.neo){ schedule(4200,()=>glitchBurst(650),i); schedule(5400,()=>glitchBurst(1100),i); }
+  if(s.neo){ schedule(3400,()=>{glitchBurst(600); speak(4900);},i); schedule(7200,()=>glitchBurst(500),i); }
   if(s.shatter){ world.style.opacity='0'; schedule(1600,()=>{ world.style.opacity='1'; },i); showWords(i); }
   setRain(s.rain || 'dim');
   [...dots.children].forEach((b,bi)=>b.classList.toggle('a',bi===i));
@@ -726,10 +726,15 @@ function blink(){ blinkT.forEach(clearTimeout); blinkT=[];
   [[160,1],[320,0],[820,1],[980,0]].forEach(([t,v])=>blinkT.push(setTimeout(()=>{eyeGlow=v;},t))); }
 // Neo speaks "Welcome to the Matrix" — mouth open/close on the syllables (~1.6s)
 let speakT=[];
-function speak(){ speakT.forEach(clearTimeout); speakT=[];
-  [120,360,620,820,1080,1360].forEach((t)=>{ speakT.push(setTimeout(()=>{mouthOpen=1;},t));
-    speakT.push(setTimeout(()=>{mouthOpen=0;},t+140)); });
-  speakT.push(setTimeout(()=>{mouthOpen=0;},1620)); }
+function speak(ms){ speakT.forEach(clearTimeout); speakT=[]; ms=ms||4900;
+  let t=100;
+  while(t<ms-200){
+    const on=110+Math.random()*100, off=80+Math.random()*150;
+    speakT.push(setTimeout(()=>{mouthOpen=1;}, t));
+    speakT.push(setTimeout(()=>{mouthOpen=0;}, t+on));
+    t += on+off;
+  }
+  speakT.push(setTimeout(()=>{mouthOpen=0;}, ms)); }
 
 /* ---- wall shatter (crumble): green rain freezes into a wall of bricks that fall away ---- */
 let bricks=null, crumbleT0=0; const BW=48, BH=40;
