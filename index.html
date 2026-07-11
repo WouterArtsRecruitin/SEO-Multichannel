@@ -176,12 +176,16 @@
   /* word-hits during the wall shatter */
   #hits{position:absolute;z-index:6;inset:0;display:grid;place-items:center;pointer-events:none}
   #hits .w{font-size:66px;font-weight:800;letter-spacing:1px;color:#f8fafc;opacity:0;
-    text-align:center;max-width:920px;line-height:1.05;
-    text-shadow:0 0 26px rgba(0,255,65,.45);transform:scale(.9)}
-  #hits .w.on{animation:hit .85s cubic-bezier(.2,.8,.2,1)}
-  @keyframes hit{0%{opacity:0;transform:scale(.82) skewX(-6deg);filter:blur(6px)}
-    18%{opacity:1;transform:scale(1) skewX(0);filter:blur(0)}
-    82%{opacity:1}100%{opacity:0;transform:scale(1.04)}}
+    text-align:center;max-width:960px;line-height:1.06;white-space:pre-line;
+    text-shadow:0 0 26px rgba(0,255,65,.45);transition:opacity .35s ease}
+  #hits .w.on{opacity:1;animation:hitIn .5s cubic-bezier(.2,.8,.2,1)}   /* enter, then HOLD until replaced */
+  @keyframes hitIn{0%{opacity:0;transform:scale(.84) skewX(-5deg);filter:blur(6px)}
+    60%{opacity:1;transform:scale(1) skewX(0);filter:blur(0)}
+    100%{opacity:1;transform:scale(1)}}
+  /* the product-name reveal (first hit) — branded, Recruitin oranje accent */
+  #hits .w.name{font-size:52px;letter-spacing:2px;color:#f8fafc;
+    text-shadow:0 0 30px rgba(255,106,0,.35),0 0 2px rgba(0,0,0,.8)}
+  #hits .w.name b{color:var(--accent);font-weight:800}
 
   /* cliffhanger outro overlay */
   #cliff{position:absolute;z-index:6;inset:0;display:grid;place-items:center;text-align:center;
@@ -281,7 +285,7 @@
     <div id="cold">
       <div>
         <div class="l1 mono">// signal acquired</div>
-        <div class="l2 mono" id="coldl">trace 127.0.0.1 → core</div>
+        <div class="l2 mono" id="coldl">AI-OS RECRUITMENT SYSTEM</div>
       </div>
     </div>
 
@@ -425,7 +429,7 @@ const SCENES = [
     cx:540, cy:1480, sc:0.52, on:[], dur:9.5, vo:'' },   // Neo morpht & zegt "Welcome to the Matrix"
 
   { shatter:true, rain:'crumble', kick:'', title:'',
-    cx:540, cy:1480, sc:0.52, on:[], dur:5, vo:'' },   // muur brokkelt af + word-hits → architectuur onthuld
+    cx:540, cy:1480, sc:0.52, on:[], dur:10, vo:'' },   // muur brokkelt af + naam-reveal + word-hits → architectuur onthuld
 
   { kick:'// het begint met één scan', title:'Eén scan. De rest gaat vanzelf.', res:'0 blanco pagina’s',
     cx:540, cy:250, sc:1.02, on:['mon','trig','obs'], dur:11,
@@ -581,6 +585,8 @@ function go(i,manual){
   // reset intro timers/state on every scene change
   scTimers.forEach(clearTimeout); scTimers=[];
   blinkT.forEach(clearTimeout); speakT.forEach(clearTimeout); eyeGlow=0; mouthOpen=0;
+  wordT.forEach(clearTimeout); wordT=[];                    // clear any lingering word-hit
+  { const hw=document.getElementById('hitw'); if(hw) hw.classList.remove('on'); }
   stage.classList.toggle('finale',!!s.finale);
   stage.classList.toggle('cliff',!!s.cliff);
   const cine = !!(s.coldopen||s.rise||s.neo||s.shatter);
@@ -634,16 +640,24 @@ function schedule(ms,fn,idx){ scTimers.push(setTimeout(()=>{ if(cur===idx) fn();
 let coldT=[];
 function runColdOpen(){ coldT.forEach(clearTimeout); coldT=[];
   const el=document.getElementById('coldl'); if(!el) return;
-  const full='trace 127.0.0.1 → core'; el.textContent='▮';
+  const full='AI-OS RECRUITMENT SYSTEM'; el.textContent='▮';
   for(let k=1;k<=full.length;k++) coldT.push(setTimeout(()=>{ el.textContent=full.slice(0,k)+'▮'; }, 220+k*48));
 }
 let wordT=[];
 function showWords(idx){ wordT.forEach(clearTimeout); wordT=[];
-  const el=document.getElementById('hitw'); if(!el) return; el.classList.remove('on'); el.textContent='';
-  const words=['ÉÉN SCAN.','EEN WEEK CONTENT.','ALLE KANALEN.','20+ UUR/WEEK TERUG.'];
-  let t=500;
-  words.forEach((w)=>{ wordT.push(setTimeout(()=>{ if(cur!==idx)return;
-    el.textContent=w; el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); }, t)); t+=850; });
+  const el=document.getElementById('hitw'); if(!el) return; el.classList.remove('on'); el.innerHTML='';
+  // 1) reveal the product NAME, then 2) the result-punches — each held long enough to read
+  const seq=[
+    {h:'HET <b>AI-OS</b>\nRECRUITMENTSYSTEEM', name:true, hold:2400},
+    {h:'ÉÉN SCAN.',            hold:1500},
+    {h:'EEN WEEK CONTENT.',    hold:1500},
+    {h:'ALLE KANALEN.',        hold:1500},
+    {h:'20+ UUR/WEEK TERUG.',  hold:1800},
+  ];
+  let t=400;
+  seq.forEach((w)=>{ wordT.push(setTimeout(()=>{ if(cur!==idx)return;
+    el.innerHTML=w.h; el.classList.toggle('name',!!w.name);
+    el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); }, t)); t+=w.hold; });
   wordT.push(setTimeout(()=>{ if(cur===idx) el.classList.remove('on'); }, t));
 }
 function setPlay(v){
@@ -756,9 +770,18 @@ function startCrumble(){
   crumbleT0=performance.now();
 }
 function drawCrumble(now){
-  rctx.clearRect(0,0,F_W,F_H);
-  const t=now-crumbleT0;
+  // keep the SAME green rain streaming behind the falling wall → no abrupt "other rain" after Neo
+  rctx.fillStyle='rgba(5,7,10,.10)'; rctx.fillRect(0,0,F_W,F_H);
   rctx.font=FS+'px "Courier New",monospace';
+  for(let i=0;i<RCOLS;i++){
+    const x=i*FS, y=drops[i]*FS;
+    const head=Math.random()>0.965;
+    rctx.fillStyle = head ? 'rgba(199,255,214,0.9)' : 'rgba(0,255,65,0.9)';
+    rctx.fillText(rC(),x,y);
+    if(y>F_H && Math.random()>0.975) drops[i]=0;
+    drops[i]+= colSpd[i];
+  }
+  const t=now-crumbleT0;
   for(const b of bricks){
     if(t>b.delay){ b.vy+=0.7; b.y+=b.vy; b.x+=b.vx; b.rot+=b.vr; b.a-=0.011; }
     if(b.a<=0||b.y>F_H+BH) continue;
@@ -783,7 +806,8 @@ function rdraw(){
   if(rainMode==='build' && buildP>0.985) rainMode='full';
   if(rainMode==='crumble'){ drawCrumble(now); return; }
   const dim = rainMode==='dim';
-  rctx.fillStyle = dim ? 'rgba(5,7,10,.20)' : 'rgba(5,7,10,.085)';
+  // same trail-fade + speed in every phase → the rain never "switches" look after Neo
+  rctx.fillStyle = dim ? 'rgba(5,7,10,.11)' : 'rgba(5,7,10,.085)';
   rctx.fillRect(0,0,F_W,F_H);
   if(rainMode==='off' && faceP<0.02) return;
   rctx.font=FS+'px "Courier New",monospace';
@@ -792,15 +816,17 @@ function rdraw(){
       if(rainMode==='build' && colOn[i]>buildP) continue;
       const x=i*FS, y=drops[i]*FS;
       const head=Math.random()>0.965;
-      rctx.fillStyle = head ? 'rgba(199,255,214,'+(dim?0.55:1)+')' : 'rgba(0,255,65,'+(dim?0.4:0.9)+')';
+      rctx.fillStyle = head ? 'rgba(199,255,214,'+(dim?0.6:1)+')' : 'rgba(0,255,65,'+(dim?0.5:0.9)+')';
       rctx.fillText(rC(),x,y);
       if(y>F_H && Math.random()>0.975) drops[i]=0;
-      drops[i]+= colSpd[i]*(dim?0.8:1);
+      drops[i]+= colSpd[i];                          // identical fall speed in dim & full
     }
   }
   // face reveal — Neo (incl. the hands adjusting the shades) built from code, fine grid + glitch surge
   if(faceP>0.02 && FACE){
     const gl = now < glitchUntil, FG=13;
+    // dome over just the CROWN band — rounds the flat-cut top, leaves hair/hands wide below
+    const HCX=F_W/2, CROWNy=FACE_Y+165, HRX=235, HRY=185;
     rctx.font='13px "Courier New",monospace';
     for(let gy=FG; gy<F_H; gy+=FG){
       const rowGl = gl && Math.random()>0.85;
@@ -808,7 +834,13 @@ function rdraw(){
       for(let gx=0; gx<F_W; gx+=FG){
         const lum=lumAt(FACE,gx,gy);
         if(lum<0.09) continue;                                   // lower → full head/hair renders (not "cut")
-        let a=Math.min(1, Math.pow(lum,1.05)*faceP*2.3);
+        let edge=1;
+        if(gy < CROWNy){                                         // arch the flat crown into a round head
+          const ex=(gx-HCX)/HRX, ey=(gy-CROWNy)/HRY, ed=ex*ex+ey*ey;
+          if(ed>1) continue;
+          if(ed>0.72) edge=Math.max(0,1-(ed-0.72)/0.28);        // feather to a soft round edge
+        }
+        let a=Math.min(1, Math.pow(lum,1.05)*faceP*2.3)*edge;
         if(rowGl) a*=0.4;
         rctx.fillStyle = lum>0.5 ? 'rgba(224,255,232,'+a+')' : 'rgba(55,242,116,'+(a*0.92)+')';
         rctx.fillText(rC(), gx+(rowGl?jx*3:jx), gy);
