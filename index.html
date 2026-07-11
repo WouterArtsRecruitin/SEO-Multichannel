@@ -423,43 +423,43 @@ const SCENES = [
     cx:540, cy:1480, sc:0.52, on:[], dur:5, vo:'' },   // muur brokkelt af + word-hits → architectuur onthuld
 
   { kick:'// laag 0/1 — bron & kennis', title:'De Bron & de Single Source of Truth',
-    cx:540, cy:250, sc:1.02, on:['mon','trig','obs'], dur:13,
+    cx:540, cy:250, sc:1.02, on:['mon','trig','obs'], dur:11,
     vo:'Eén bron: je wekelijkse recruitment-scan. De Obsidian Vault levert instructies, tone-of-voice, persona\'s en templates als single source of truth.' },
 
   { kick:'// laag 2 — orkestratie', title:'De Centrale Orchestrator',
-    cx:540, cy:540, sc:1.12, on:['stitch','mon','trig','obs'], dur:11,
+    cx:540, cy:540, sc:1.12, on:['stitch','mon','trig','obs'], dur:8,
     vo:'Onze eigen workflow-engine orkestreert alles als centrale content-planner én state manager.' },
 
   { kick:'// laag 3 — model-router', title:'Dynamische Model Router',
-    cx:540, cy:940, sc:0.9, on:['router','haiku','sonnet','gemini'], dur:14,
+    cx:540, cy:940, sc:0.9, on:['router','haiku','sonnet','gemini'], dur:11,
     vo:'De router kiest per taak het juiste én goedkoopste model — Haiku voor triage, Sonnet 5 voor code & copy, Gemini 3.1 Pro voor grote datasets.' },
 
   { kick:'// laag 4 — tools & data', title:'Research, Media & Assembly',
-    cx:540, cy:1420, sc:0.88, on:['apify','leo','kling','placid','mj','supa'], dur:14,
+    cx:540, cy:1420, sc:0.88, on:['apify','leo','kling','placid','mj','supa'], dur:10,
     vo:'Apify scrapt de concurrentie; Leonardo, Kling, Placid en Midjourney maken het beeld; Supabase voegt alles samen tot één concept.' },
 
   { kick:'// laag 5 — de splitsing', title:'Eén Onderwerp, Vier Kanalen',
-    cx:540, cy:1845, sc:0.9, on:['seo','licorp','liper','meta'], dur:13,
+    cx:540, cy:1845, sc:0.9, on:['seo','licorp','liper','meta'], dur:9,
     vo:'Eén onderwerp wordt uniek opgesplitst in vier kanaalversies — nooit gekopieerde content.' },
 
   { kick:'// USP — dual-track', title:'De LinkedIn Dual-Track',
-    cx:540, cy:1845, sc:1.24, on:['licorp','liper'], dur:15,
+    cx:540, cy:1845, sc:1.24, on:['licorp','liper'], dur:11,
     vo:'De sleutel: bedrijfspagina (autoriteit, \'wij\') én persoonlijk profiel (empathie, \'ik\', dwell time) — zo omzeil je LinkedIns straf op dubbele content.' },
 
   { kick:'// laag 6 — bescherming', title:'Kwaliteit, Merk & Algorithm Intelligence',
-    cx:540, cy:2125, sc:0.9, on:['qgate','brand','aia'], dur:15,
+    cx:540, cy:2125, sc:0.9, on:['qgate','brand','aia'], dur:12,
     vo:'SEO-check en Brand Guardian bewaken kwaliteit; de Algorithm Intelligence Agent is een realtime immuunsysteem dat elke post aanpast aan de nieuwste Meta- en LinkedIn-regels.' },
 
   { kick:'// laag 7/8 — sluis & publicatie', title:'Menselijke Sluis & Publicatie',
-    cx:540, cy:2540, sc:0.72, on:['cowork','wp','liapi','metaapi'], dur:14,
+    cx:540, cy:2540, sc:0.72, on:['cowork','wp','liapi','metaapi'], dur:9,
     vo:'Jij keurt goed in de Cowork-sluis; daarna publiceert het systeem naar WordPress, LinkedIn en Meta.' },
 
   { kick:'// het vliegwiel', title:'Eén Autonoom Omnichannel Vliegwiel',
-    cx:540, cy:1480, sc:0.5, on:NODES.map(n=>n.id), dur:12,
+    cx:540, cy:1480, sc:0.5, on:NODES.map(n=>n.id), dur:9,
     vo:'Eén scan → website, twee LinkedIn-sporen én Meta Ads. Een autonoom, zelflerend vliegwiel dat 24/7 draait.' },
 
   { cliff:true, rain:'full', kick:'// module 01 / ∞', title:'',
-    cx:540, cy:1480, sc:0.52, on:[], dur:9, vo:'' },
+    cx:540, cy:1480, sc:0.52, on:[], dur:8, vo:'' },
 ];
 window.SCENE_DUR = SCENES.map(s => s.dur || 8); // seconds per scene, read by the recorder
 

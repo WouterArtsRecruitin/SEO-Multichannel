@@ -116,8 +116,9 @@ node scripts/record.js [uitvoer.mp4]
 
 De schermtijd per scène komt uit `window.SCENE_DUR` in `index.html` (seconden),
 zodat video en voice-over exact gelijk lopen: pas een VO-zin aan, zet de bijbehorende
-`dur` gelijk, en re-render. De huidige set (8-13-13-10-14-14-14s) geeft ± 86s
-totaal. Valt `SCENE_DUR` weg, dan gebruikt de recorder de vaste `TRANSITION_MS +
+`dur` gelijk, en re-render. De huidige set (cinematische intro 23,5s +
+architectuur 90s + cliffhanger 8s) geeft ± 2:01 totaal, strak op de ± 1:46 VO.
+Valt `SCENE_DUR` weg, dan gebruikt de recorder de vaste `TRANSITION_MS +
 DWELL_MS` bovenaan `scripts/record.js`. De MP4 heeft geen audio — de voice-over
 leg je eronder in je editor of ElevenLabs.
 
