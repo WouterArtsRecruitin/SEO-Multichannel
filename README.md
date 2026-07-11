@@ -38,20 +38,20 @@ Static site, geen build. `netlify.toml` staat al klaar:
 |------|---------|-----|
 | **0. Bron & trigger** | Recruitment-Monitor · Cloud Trigger (+ custom input-MCP) | Wekelijkse scan van recruitment-updates → payload (.json/.md); webhook/cronjob start-signaal |
 | **1. Kennis / SSOT** | Obsidian Vault | Instructies v5 · tone of voice · buyer persona's · SEO-pijlers · templates (SSOT), gelezen als YAML |
-| **2. Orkestratie** | Google Stitch | Centrale Content Planner / SEO-Manager · cloud-workflows · state manager |
+| **2. Orkestratie** | Content Orchestrator (eigen workflow-engine) | Centrale cloud-workflows · content-planner · state manager |
 | **3. Model-router** | LiteLLM Router → Claude Haiku / Sonnet 5 / Gemini 3.1 Pro | Leest YAML, kiest per taak het juiste én goedkoopste model (triage / code & copy / grote datasets) → executie-fase |
 | **4. Research & media** | Apify SERP · Leonardo · Kling · Placid/Bannerbear · Midjourney · Supabase | Concurrentie-scrape, beeld & video, corporate/candid visuals, concept samenvoegen & status-DB |
 | **5. Omnichannel-splitsing** | SEO Blog-Writer · LinkedIn Bedrijf (Route A) · LinkedIn Persoonlijk (Route B) · Meta Ad Copywriter | Eén onderwerp → vier unieke kanaalversies; LinkedIn **dual-track** omzeilt de straf op dubbele content |
 | **6. Kwaliteit, merk & AIA** | Interne Kwaliteits-Sluis · Brand Guardian + Compliance Counsel · Algorithm Intelligence Agent | AI SEO-check; huisstijl & compliance; realtime immuunsysteem tegen algoritme-wijzigingen |
-| **7. Menselijke sluis** | Cowork Wait-State | Stitch pauzeert tot de redacteur goedkeurt |
-| **8. Publicatie + vliegwiel** | WordPress/Webflow · LinkedIn API (Buffer/ShareIn) · Meta Marketing API | Live/ingepland; feedback-loop (statusupdate) terug naar Stitch = autonoom vliegwiel |
+| **7. Menselijke sluis** | Cowork Wait-State | Orchestrator pauzeert tot de redacteur goedkeurt |
+| **8. Publicatie + vliegwiel** | WordPress/Webflow · LinkedIn API (Buffer/ShareIn) · Meta Marketing API | Live/ingepland; feedback-loop (statusupdate) terug naar de orchestrator = autonoom vliegwiel |
 
 **Agent-skills** zichtbaar in de animatie: SEO Blog-Writer — `generate_seo_structure()`,
 `create_internal_links()`; Algorithm Intelligence Agent — `update_platform_guidelines()`,
 `audit_algorithm_match()`.
 
 De oranje gestippelde lijn is de **feedback-loop**: statusupdates stromen vanuit
-de publicatie terug naar Google Stitch — het autonome vliegwiel. Gloeiende
+de publicatie terug naar de orchestrator — het autonome vliegwiel. Gloeiende
 data-pakketjes lopen over elke verbinding mee (incl. de feedback-kabel terug).
 
 ## Voice-over script (NL, je/jouw-vorm)
@@ -68,7 +68,7 @@ tussen haakjes.
 
 **Scene 1 — De Bron & Orkestratie** *(rustig, opbouwend)*
 > Alles start bij de bron. Jouw wekelijkse recruitment-scan stroomt als data
-> direct de Centrale Content Planner — Google Stitch — binnen. De Obsidian Vault
+> direct de Centrale Content Planner binnen. De Obsidian Vault
 > levert merkstem, SEO-pijlers en templates als single source of truth.
 
 **Scene 2 — De Dynamische Model Router** *(technisch, zelfverzekerd)*

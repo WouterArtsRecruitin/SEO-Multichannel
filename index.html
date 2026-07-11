@@ -327,7 +327,7 @@ const NODES = [
   {id:'trig',  c:C.green,  ic:'⚡', hd:'Cloud Trigger',       b:'Webhook of cronjob start de workflow',      s:'Start-signaal',  x:400,y:110, w:280,h:170},
   {id:'obs',   c:C.purple, ic:'🔮', hd:'Obsidian Vault',      b:'Instructies v5 · tone of voice · buyer persona\'s · SEO-pijlers · templates (SSOT)', s:'Leest YAML · lokale sync', x:720,y:110, w:320,h:170},
   // ── Laag 2 · Orkestratie ────────────────────────────────
-  {id:'stitch',c:C.blue,   ic:'☁️', hd:'Google Stitch',       b:'Centrale Content Planner / SEO-Manager · centrale cloud-workflows', s:'State manager · orkestrator', x:330,y:420,w:420,h:170},
+  {id:'stitch',c:C.blue,   ic:'⚙️', hd:'Content Orchestrator', b:'Eigen workflow-engine · centrale cloud-workflows · content-planner', s:'State manager · orkestrator', x:330,y:420,w:420,h:170},
   // ── Laag 3 · Dynamische model-router ────────────────────
   {id:'router',c:C.orange, ic:'🔀', hd:'LiteLLM Router',      b:'Leest Obsidian-YAML · kiest model per taak → executie-fase', s:'Dynamische routing', x:330,y:720,w:420,h:160},
   {id:'haiku', c:C.orange, ic:'⚡', hd:'Claude Haiku',        b:'Triage & filtering',                        s:'Snel & goedkoop', x:40, y:980, w:300,h:150},
@@ -350,7 +350,7 @@ const NODES = [
   {id:'brand', c:C.red,    ic:'🛡️', hd:'Brand & Compliance',  b:'Brand Guardian + Compliance Counsel · huisstijl & Meta/LI-regels', s:'Merk & compliance', x:390,y:2040,w:300,h:170},
   {id:'aia',   c:C.cyan,   ic:'🧬', hd:'Algorithm Intelligence', b:'Scant dev-blogs Meta/LinkedIn · realtime immuunsysteem', sk:['update_platform_guidelines()','audit_algorithm_match()'], s:'Beschermt bereik', x:740,y:2040,w:300,h:170},
   // ── Laag 7 · Menselijke sluis ───────────────────────────
-  {id:'cowork',c:C.red,    ic:'⏸️', hd:'Cowork Wait-State',   b:'Stitch pauzeert · redacteur keurt goed',    s:'Menselijke sluis', x:330,y:2320,w:420,h:150},
+  {id:'cowork',c:C.red,    ic:'⏸️', hd:'Cowork Wait-State',   b:'Orchestrator pauzeert · redacteur keurt goed', s:'Menselijke sluis', x:330,y:2320,w:420,h:150},
   // ── Laag 8 · Publicatie + vliegwiel ─────────────────────
   {id:'wp',    c:C.emerald,ic:'🌐', hd:'WordPress / Webflow', b:'Blog live via API',                         s:'Website',        x:40, y:2600,w:300,h:150},
   {id:'liapi', c:C.blue,   ic:'💼', hd:'LinkedIn API',        b:'Inplannen (Buffer/ShareIn) · link-in-comments', s:'Bedrijf + persoonlijk', x:390,y:2600,w:300,h:150},
@@ -394,9 +394,9 @@ const SCENES = [
     cx:540, cy:250, sc:1.02, on:['mon','trig','obs'], dur:13,
     vo:'Eén bron: je wekelijkse recruitment-scan. De Obsidian Vault levert instructies, tone-of-voice, persona\'s en templates als single source of truth.' },
 
-  { kick:'// laag 2 — orkestratie', title:'Google Stitch · de Orkestrator',
+  { kick:'// laag 2 — orkestratie', title:'De Centrale Orchestrator',
     cx:540, cy:540, sc:1.12, on:['stitch','mon','trig','obs'], dur:11,
-    vo:'Google Stitch orkestreert alles als centrale content-planner én state manager.' },
+    vo:'Onze eigen workflow-engine orkestreert alles als centrale content-planner én state manager.' },
 
   { kick:'// laag 3 — model-router', title:'Dynamische Model Router',
     cx:540, cy:940, sc:0.9, on:['router','haiku','sonnet','gemini'], dur:14,
