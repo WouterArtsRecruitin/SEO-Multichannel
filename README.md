@@ -54,50 +54,62 @@ De oranje gestippelde lijn is de **feedback-loop**: statusupdates stromen vanuit
 de publicatie terug naar de orchestrator — het autonome vliegwiel. Gloeiende
 data-pakketjes lopen over elke verbinding mee (incl. de feedback-kabel terug).
 
-## Voice-over script (NL, je/jouw-vorm)
+## Voice-over script (NL, resultaat-gedreven — voor de niet-technische beslisser)
 
-De ondertitels in de animatie zijn tegelijk het VO-script. Geschikt voor een
-ElevenLabs-avatar; totale spreektijd ± 80 seconden, verdeeld over 7 blokken die
-één-op-één met de scènes (en hun schermtijd) overeenkomen — zie de duur per
-scène in `window.SCENE_DUR` bovenaan het script. Regie-aanwijzing per scène
-tussen haakjes.
+De VO is bewust omgebouwd van *techniek-uitleg* naar *wat het oplevert*, in
+gewone taal en geruststellend van toon — gericht op een HR-manager of
+bureau-eigenaar, niet op een systeemarchitect. Twee sprekers:
 
-**Intro — Recruitin · AI Agency** *(hook, mysterieus)* — ± 8s
-> Wat als één brononderwerp automatisch je hele contentmachine voedt? Dit is het
-> Omnichannel AI Content OS van Recruitin.
+1. **Neo-hook** (diepe, trage stem) over de intro-scène — de scroll-stopper.
+   > Welcome… to the Matrix… of the AI-OS recruitment system.
+2. **Nederlandse narratie** (Orion, ± 1:34) — start zodra de muur afbrokkelt en
+   loopt door t/m het vliegwiel. Opent met een resultaat-hook, daarna één
+   duidelijke belofte per scène.
 
-**Scene 1 — De Bron & Orkestratie** *(rustig, opbouwend)*
-> Alles start bij de bron. Jouw wekelijkse recruitment-scan stroomt als data
-> direct de Centrale Content Planner binnen. De Obsidian Vault
-> levert merkstem, SEO-pijlers en templates als single source of truth.
+**Hook — bij de reveal** *(nieuwsgierig)*
+> Wat als één druk op de knop je hele week aan recruitment-content oplevert?
+> Automatisch. En jij houdt altijd de controle.
 
-**Scene 2 — De Dynamische Model Router** *(technisch, zelfverzekerd)*
-> De Router leest de Obsidian-YAML en kiest per taak het juiste brein: Claude
-> Haiku voor snelle triage, Claude Sonnet 5 voor precieze copy en code, en
-> Gemini 3.1 Pro voor long-form en grote datasets.
+**Eén scan** — *0 blanco pagina's*
+> Het begint met één wekelijkse scan van jouw vakgebied. Meer hoef jij niet te
+> doen; het systeem weet al hoe jouw merk klinkt, en waar jouw doelgroep op zit.
 
-**Scene 3 — Research, Media & Opslag** *(vlot)*
-> Parallel scrapt Apify de top-10 concurrenten, genereert Leonardo de beelden,
-> en voegt Supabase alle losse elementen samen tot één compleet concept-artikel.
+**Vanuit één plek** — *geen los geknutsel*
+> Eén centrale regisseur plant en bewaakt het hele proces. Jij hoeft niets te
+> koppelen of in de gaten te houden.
 
-**Scene 4 — De Omnichannel Splitsing** *(enthousiast — de climax van de flow)*
-> Hier gebeurt de magie: één brononderwerp wordt uniek opgesplitst. Een SEO-blog
-> voor je website, een B2B-carrousel voor je bedrijfspagina, een persoonlijk
-> verhaal voor je profiel én actiegerichte Meta Ads.
+**Slim én zuinig** — *tot 90% goedkoper*
+> Voor elke taak kiest het systeem automatisch het beste én goedkoopste model.
+> Zware klussen slim, simpele klussen goedkoop. Jij betaalt nooit te veel.
 
-**Scene 5 — Compliance & Algorithm Intelligence** *(krachtig, geruststellend)*
-> Voordat er iets live gaat bewaakt de Brand Guardian je huisstijl, en scant de
-> Algorithm Intelligence Agent realtime de regels van Meta en LinkedIn. Daarna
-> wacht het systeem op jouw akkoord in de Cowork-sluis.
+**Tekst én beeld** — *geen aparte designer nodig*
+> Het bekijkt de concurrentie, en maakt de teksten, beelden en video's er meteen
+> bij. Alles kant-en-klaar, in jouw huisstijl.
 
-**Scene 6 — Publicatie & Het Vliegwiel** *(uitnodigend, zoomt uit)*
-> Na goedkeuring publiceert het systeem volautomatisch naar al je kanalen. Het
-> resultaat: een autonoom, omnichannel vliegwiel dat 24/7 jouw autoriteit bouwt
-> en leads converteert. Welkom in de matrix.
+**Eén onderwerp, vier kanalen** — *4× bereik, 0 kopieerwerk*
+> Uit dat ene onderwerp maakt het systeem vier unieke versies: voor je website,
+> voor LinkedIn, en voor je advertenties. Nooit gekopieerd.
 
-**ElevenLabs-tip:** stem met hoge autoriteit maar conversationele toon (bijv.
-Callum of Marcus), Stability ± 35%. Forceer pauzes tussen scènes met
-`<break time="1.0s" />` om de VO exact op de camera-overgangen te synchroniseren.
+**LinkedIn dual-track** — *5–10× meer weergaven*
+> Op LinkedIn plaatst het slim vanaf je bedrijfspagina én je persoonlijke
+> profiel. Zo bereik je veel meer mensen, zonder gedoe.
+
+**On-brand & compliant** — *geen missers online*
+> Voordat er iets naar buiten gaat, controleert het systeem de kwaliteit, je
+> huisstijl, en de nieuwste regels van LinkedIn en Meta. Zo staat er nooit een
+> misser online.
+
+**Jij beslist** — *de mens beslist, niet de AI*
+> En het allerbelangrijkste: niets gaat live zonder jouw akkoord. Jij houdt de
+> eindcontrole.
+
+**Het resultaat** — *ruim 20 uur per week terug*
+> Eén scan wordt jouw hele week aan content, op elk kanaal. Je wint zo'n twintig
+> uur per week. En je blijft continu zichtbaar, bij de juiste mensen.
+
+De schermtekst (`title` + oranje `res`-metric per scène in `SCENES`) loopt
+één-op-één mee met deze VO. De narratie (± 94s) valt over de architectuur-scènes;
+pas een zin aan, zet de bijbehorende `dur` gelijk, en re-render.
 
 ## Video-export (MP4) — voor ElevenLabs / CapCut
 
