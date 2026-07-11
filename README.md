@@ -12,8 +12,10 @@ scènes die samen de complete procesflow van A tot Z tonen.
 
 ## Bekijken
 
-Open `index.html` in een browser. Meer is niet nodig — alles zit in dat ene
-bestand (HTML + CSS + vanilla JS + canvas Matrix-rain).
+Open `index.html` in een browser. De presentatie is één bestand (HTML + CSS +
+vanilla JS + canvas Matrix-rain); de enige externe asset is het Recruitin-logo
+in `assets/recruitin-mark.png`, dus houd de map `assets/` naast `index.html`.
+Er is een gebrande **intro** (logo-reveal) en **outro** ("Welkom in de matrix").
 
 **Bediening**
 - `▶ / ⏸` — autoplay aan/uit (8,2s per scène)
@@ -48,8 +50,14 @@ de publicatie terug naar Google Stitch — het autonome vliegwiel.
 ## Voice-over script (NL, je/jouw-vorm)
 
 De ondertitels in de animatie zijn tegelijk het VO-script. Geschikt voor een
-ElevenLabs-avatar; totale spreektijd ± 55–65 seconden. Regie-aanwijzing per
-scène tussen haakjes.
+ElevenLabs-avatar; totale spreektijd ± 80 seconden, verdeeld over 7 blokken die
+één-op-één met de scènes (en hun schermtijd) overeenkomen — zie de duur per
+scène in `window.SCENE_DUR` bovenaan het script. Regie-aanwijzing per scène
+tussen haakjes.
+
+**Intro — Recruitin · AI Agency** *(hook, mysterieus)* — ± 8s
+> Wat als één brononderwerp automatisch je hele contentmachine voedt? Dit is het
+> Omnichannel AI Content OS van Recruitin.
 
 **Scene 1 — De Bron & Orkestratie** *(rustig, opbouwend)*
 > Alles start bij de bron. Jouw wekelijkse recruitment-scan stroomt als data
@@ -99,10 +107,12 @@ npx playwright install chromium   # of laat CHROMIUM_PATH wijzen naar een bestaa
 node scripts/record.js [uitvoer.mp4]
 ```
 
-Instellingen bovenaan `scripts/record.js`: `FPS`, `TRANSITION_MS` (duur van de
-camera-beweging per scène) en `DWELL_MS` (hoe lang elke scène blijft staan). De
-totale videolengte = `nScenes × (TRANSITION_MS + DWELL_MS)`. De MP4 heeft geen
-audio — de voice-over voeg je toe in je editor of ElevenLabs.
+De schermtijd per scène komt uit `window.SCENE_DUR` in `index.html` (seconden),
+zodat video en voice-over exact gelijk lopen: pas een VO-zin aan, zet de bijbehorende
+`dur` gelijk, en re-render. De huidige set (8-13-13-10-14-14-14s) geeft ± 86s
+totaal. Valt `SCENE_DUR` weg, dan gebruikt de recorder de vaste `TRANSITION_MS +
+DWELL_MS` bovenaan `scripts/record.js`. De MP4 heeft geen audio — de voice-over
+leg je eronder in je editor of ElevenLabs.
 
 ## Aanpassen
 

@@ -93,10 +93,8 @@
   .hud{position:absolute;z-index:6;pointer-events:none}
   #top{top:0;left:0;right:0;padding:34px 40px;display:flex;justify-content:space-between;align-items:flex-start}
   #brand{display:flex;align-items:center;gap:14px}
-  #logo{width:34px;height:34px;border-radius:9px;position:relative;
-    background:radial-gradient(circle at 35% 30%,#ffb27a,var(--accent) 60%,#7a2f00);
-    box-shadow:0 0 22px rgba(255,106,0,.7)}
-  #logo::after{content:"";position:absolute;inset:9px;border-radius:4px;background:#05070a}
+  #logo{width:42px;height:42px;object-fit:contain;
+    filter:drop-shadow(0 0 10px rgba(255,140,0,.6)) brightness(1.15)}
   #brand .t{font-weight:800;font-size:18px;letter-spacing:.5px}
   #brand .t span{color:var(--accent)}
   #brand .sub{font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-top:2px}
@@ -136,6 +134,22 @@
   #prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--matrix),var(--accent));
     box-shadow:0 0 10px var(--matrix);transition:width .25s linear}
 
+  /* branded intro / outro card */
+  #brandcard{position:absolute;z-index:6;inset:0;display:grid;place-items:center;
+    text-align:center;opacity:0;pointer-events:none;transition:opacity 1s ease;
+    background:radial-gradient(60% 40% at 50% 42%,rgba(5,7,10,.55),rgba(5,7,10,.92))}
+  #stage.intro #brandcard{opacity:1}
+  #brandcard .hero{width:340px;height:340px;object-fit:contain;
+    filter:drop-shadow(0 0 42px rgba(255,140,0,.5)) brightness(1.12);
+    animation:heroIn 1.6s cubic-bezier(.22,.61,.36,1)}
+  @keyframes heroIn{from{opacity:0;transform:scale(.8) translateY(20px)}to{opacity:1;transform:none}}
+  #brandcard .wm{margin-top:26px;font-size:62px;font-weight:800;letter-spacing:8px;
+    color:#f8fafc}
+  #brandcard .wm b{color:var(--accent);font-weight:800}
+  #brandcard .tag{margin-top:6px;font-size:20px;letter-spacing:2px;color:#cbd5e1;font-style:italic}
+  #brandcard .boot{margin-top:34px;font-size:13px;letter-spacing:5px;color:var(--matrix);
+    text-transform:uppercase;text-shadow:0 0 12px rgba(0,255,65,.5)}
+
   /* intro / finale flourish text */
   #finaleTxt{position:absolute;z-index:6;inset:0;display:grid;place-items:center;
     text-align:center;opacity:0;transition:opacity 1s ease;pointer-events:none}
@@ -169,7 +183,7 @@
     <!-- HUD -->
     <div id="top" class="hud">
       <div id="brand">
-        <div id="logo"></div>
+        <img id="logo" src="assets/recruitin-mark.png" alt="Recruitin" />
         <div>
           <div class="t">RECRUITIN <span>·</span> AI AGENCY</div>
           <div class="sub">SYS://Omnichannel_Content_OS</div>
@@ -183,10 +197,21 @@
       <h2 id="ctitle">De Bron &amp; Orkestratie</h2>
     </div>
 
+    <div id="brandcard">
+      <div>
+        <img class="hero" src="assets/recruitin-mark.png" alt="Recruitin" />
+        <div class="wm">recru<b>i</b>t<b>i</b>n</div>
+        <div class="tag">the right people, right now</div>
+        <div class="boot mono">// Omnichannel AI Content OS — v3.0</div>
+      </div>
+    </div>
+
     <div id="finaleTxt">
       <div>
+        <img class="hero" src="assets/recruitin-mark.png" alt="Recruitin"
+          style="width:120px;height:120px;object-fit:contain;filter:drop-shadow(0 0 30px rgba(255,140,0,.55));margin-bottom:20px" />
         <div class="big">WELKOM IN DE <span>MATRIX</span></div>
-        <div class="small mono">24/7 autonoom · omnichannel vliegwiel</div>
+        <div class="small mono">Recruitin · 24/7 autonoom omnichannel vliegwiel</div>
       </div>
     </div>
 
@@ -258,31 +283,35 @@ const WIRES = [
 /* ---------- 2. SCENES (camera + narration) ---------- */
 const F_W=1080, F_H=1920;
 const SCENES = [
+  { brand:true, kick:'// system online', title:'Recruitin · AI Agency',
+    cx:540, cy:1290, sc:0.60, on:[], dur:8,
+    vo:'Wat als één brononderwerp automatisch je hele contentmachine voedt? Dit is het Omnichannel AI Content OS van Recruitin.' },
+
   { kick:'// fase 01 — input', title:'De Bron & Orkestratie',
-    cx:540, cy:340, sc:1.12, on:['mon','obs','stitch'],
+    cx:540, cy:340, sc:1.12, on:['mon','obs','stitch'], dur:13,
     vo:'Alles start bij de bron. Jouw wekelijkse recruitment-scan stroomt als data direct de Centrale Content Planner — Google Stitch — binnen. De Obsidian Vault levert merkstem, SEO-pijlers en templates als single source of truth.' },
 
   { kick:'// fase 02 — routing', title:'De Dynamische Model Router',
-    cx:540, cy:870, sc:0.95, on:['router','haiku','sonnet','gemini'],
+    cx:540, cy:870, sc:0.95, on:['router','haiku','sonnet','gemini'], dur:13,
     vo:'De Router leest de Obsidian-YAML en kiest per taak het juiste brein: Claude Haiku voor snelle triage, Claude Sonnet 5 voor precieze copy en code, en Gemini 3.1 Pro voor long-form en grote datasets.' },
 
   { kick:'// fase 03 — tools & data', title:'Research, Media & Opslag',
-    cx:540, cy:1300, sc:1.05, on:['apify','media','supa'],
+    cx:540, cy:1300, sc:1.05, on:['apify','media','supa'], dur:10,
     vo:'Parallel scrapt Apify de top-10 concurrenten, genereert Leonardo de beelden, en voegt Supabase alle losse elementen samen tot één compleet concept-artikel.' },
 
   { kick:'// fase 04 — de splitsing', title:'De Omnichannel Splitsing',
-    cx:540, cy:1610, sc:0.98, on:['seo','licorp','liper','meta'],
+    cx:540, cy:1610, sc:0.98, on:['seo','licorp','liper','meta'], dur:14,
     vo:'Hier gebeurt de magie: één brononderwerp wordt uniek opgesplitst. Een SEO-blog voor je website, een B2B-carrousel voor je bedrijfspagina, een persoonlijk verhaal voor je profiel én actiegerichte Meta Ads.' },
 
   { kick:'// fase 05 — de sluis', title:'Compliance & Algorithm Intelligence',
-    cx:540, cy:1970, sc:0.92, on:['brand','aia','cowork'],
+    cx:540, cy:1970, sc:0.92, on:['brand','aia','cowork'], dur:14,
     vo:'Voordat er iets live gaat bewaakt de Brand Guardian je huisstijl, en scant de Algorithm Intelligence Agent realtime de regels van Meta en LinkedIn. Daarna wacht het systeem op jouw akkoord in de Cowork-sluis.' },
 
   { kick:'// fase 06 — het vliegwiel', title:'Publicatie & Het Vliegwiel',
-    cx:540, cy:1290, sc:0.60, on:NODES.map(n=>n.id), finale:true,
+    cx:540, cy:1290, sc:0.60, on:NODES.map(n=>n.id), finale:true, dur:14,
     vo:'Na goedkeuring publiceert het systeem volautomatisch naar al je kanalen. Het resultaat: een autonoom, omnichannel vliegwiel dat 24/7 jouw autoriteit bouwt en leads converteert. Welkom in de matrix.' },
 ];
-const SCENE_MS = 8200;
+window.SCENE_DUR = SCENES.map(s => s.dur || 8); // seconds per scene, read by the recorder
 
 /* ---------- 3. BUILD DOM ---------- */
 const world = document.getElementById('world');
@@ -368,6 +397,7 @@ function go(i,manual){
   document.getElementById('votxt').textContent=s.vo;
   document.getElementById('clab').textContent='SCENE '+String(i+1).padStart(2,'0');
   stage.classList.toggle('finale',!!s.finale);
+  stage.classList.toggle('intro',!!s.brand);
   [...dots.children].forEach((b,bi)=>b.classList.toggle('a',bi===i));
   // subtitle re-animate
   const vt=document.getElementById('votxt');
@@ -377,7 +407,7 @@ function go(i,manual){
 }
 function tick(now){
   if(playing){
-    const el=now-tStart, p=Math.min(el/SCENE_MS,1);
+    const el=now-tStart, p=Math.min(el/((SCENES[cur].dur||8)*1000),1);
     prog.style.width=(p*100)+'%';
     if(p>=1) go(cur+1);
   }

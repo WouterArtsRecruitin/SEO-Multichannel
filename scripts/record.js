@@ -57,11 +57,14 @@ const DWELL_MS = 3400;       // hold per scene once the camera settles
   await page.goto(FILE);
   await page.waitForFunction(() => typeof window.go === 'function');
   await page.evaluate(() => window.setPlay(false)); // drive the timeline ourselves
-  const n = await page.evaluate(() => document.querySelectorAll('#dots button').length);
+  // per-scene durations (seconds) exposed by index.html; fall back to a fixed hold
+  const durs = await page.evaluate(() =>
+    window.SCENE_DUR || Array(document.querySelectorAll('#dots button').length).fill(0));
 
-  for (let s = 0; s < n; s++) {
+  for (let s = 0; s < durs.length; s++) {
     await page.evaluate((i) => window.go(i, true), s);
-    await page.waitForTimeout(TRANSITION_MS + DWELL_MS);
+    const hold = durs[s] > 0 ? durs[s] * 1000 : (TRANSITION_MS + DWELL_MS);
+    await page.waitForTimeout(hold);
   }
 
   await context.close(); // finalizes the .webm
