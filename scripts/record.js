@@ -57,6 +57,7 @@ const DWELL_MS = 3400;       // hold per scene once the camera settles
   await page.goto(FILE);
   await page.waitForFunction(() => typeof window.go === 'function');
   await page.evaluate(() => window.setPlay(false)); // drive the timeline ourselves
+  await page.evaluate(() => { const h = document.getElementById('soundhint'); if (h) h.style.display = 'none'; });
   // per-scene durations (seconds) exposed by index.html; fall back to a fixed hold
   const durs = await page.evaluate(() =>
     window.SCENE_DUR || Array(document.querySelectorAll('#dots button').length).fill(0));
