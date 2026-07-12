@@ -40,9 +40,8 @@
     box-shadow:0 0 120px rgba(0,255,65,.05) inset;
   }
 
-  /* ---- matrix rain ---- */
-  #rain{position:absolute;inset:0;z-index:1;opacity:.22;transition:opacity 1.2s ease}
-  #stage.finale #rain{opacity:.5}
+  /* ---- matrix rain (intensity is JS-driven per phase) ---- */
+  #rain{position:absolute;inset:0;z-index:1;opacity:1}
   /* vignette + grid overlay */
   #grid{position:absolute;inset:0;z-index:2;pointer-events:none;
     background-image:linear-gradient(rgba(51,65,85,.10) 1px,transparent 1px),
@@ -53,18 +52,24 @@
 
   /* ---- the world that the camera moves over ---- */
   #world{position:absolute;top:0;left:0;z-index:3;
-    width:1080px;height:2520px;
+    width:1080px;height:2960px;
     transform-origin:0 0;
-    transition:transform 1.25s cubic-bezier(.22,.61,.36,1)}
+    transition:transform 1.75s cubic-bezier(.45,.02,.2,1),opacity 1.2s ease}
+  /* (architecture visibility during the cinematic intro is driven by JS via world.style.opacity) */
 
   /* connectors */
-  #wires{position:absolute;top:0;left:0;width:1080px;height:2520px;overflow:visible}
+  #wires{position:absolute;top:0;left:0;width:1080px;height:2960px;overflow:visible}
   .wire{fill:none;stroke:var(--line);stroke-width:2.2;opacity:.35;
-    stroke-linecap:round;transition:opacity .8s ease,stroke .8s ease}
+    stroke-linecap:round;transition:opacity 1s ease,stroke 1s ease}
   .wire.flow{stroke-dasharray:6 10;animation:flow 1.1s linear infinite}
   .wire.on{opacity:.95;stroke:var(--matrix);filter:drop-shadow(0 0 5px rgba(0,255,65,.55))}
   .wire.feedback{stroke:var(--accent);stroke-dasharray:3 12;opacity:.5}
   .wire.feedback.on{opacity:.95;filter:drop-shadow(0 0 6px rgba(255,106,0,.6))}
+  /* travelling data packets along the wires */
+  .pkt{fill:var(--matrix);opacity:.55;filter:drop-shadow(0 0 6px rgba(0,255,65,.9));
+    transition:opacity 1s ease}
+  .pkt.on{opacity:1}
+  .pkt.fb{fill:var(--accent);filter:drop-shadow(0 0 7px rgba(255,140,0,.95))}
   @keyframes flow{to{stroke-dashoffset:-32}}
 
   /* nodes */
@@ -73,30 +78,33 @@
     box-shadow:0 8px 30px rgba(0,0,0,.45);
     transition:transform .7s cubic-bezier(.22,.61,.36,1),box-shadow .7s ease,
       border-color .7s ease,opacity .7s ease,filter .7s ease;
-    opacity:.45;filter:saturate(.6)}
-  .node.on{opacity:1;filter:saturate(1);
-    box-shadow:0 0 0 1px var(--nc),0 0 34px -6px var(--nc),0 12px 40px rgba(0,0,0,.55);
+    opacity:.24;filter:saturate(.4) blur(1.7px)}          /* inactive = background "proof" texture */
+  .node.on{opacity:1;filter:saturate(1) blur(0);
+    box-shadow:0 0 0 1px var(--nc),0 0 38px -5px var(--nc),0 12px 40px rgba(0,0,0,.55);
     transform:translateY(-2px)}
-  .node .h{font-size:19px;font-weight:800;letter-spacing:.2px;line-height:1.15;display:flex;gap:10px;align-items:center}
-  .node .ic{font-size:20px;filter:drop-shadow(0 0 6px var(--nc))}
-  .node .b{margin-top:7px;font-size:13.5px;color:var(--muted);line-height:1.35}
+  .node .h{font-size:20px;font-weight:800;letter-spacing:.2px;line-height:1.15;display:flex;gap:10px;align-items:center;color:#ffffff}
+  .node .ic{font-size:21px;filter:drop-shadow(0 0 6px var(--nc))}
+  .node .b{margin-top:7px;font-size:15px;color:#dbe4f0;line-height:1.4}   /* was muted grey — brighter for mobile */
   .node .s{margin-top:11px;display:inline-flex;gap:8px;align-items:center;
-    font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#cbd5e1}
+    font-size:11.5px;letter-spacing:.6px;text-transform:uppercase;color:#e2e8f0}
   .node .dot{width:9px;height:9px;border-radius:50%;background:var(--nc);
     box-shadow:0 0 10px var(--nc);animation:pulse 1.8s ease-in-out infinite}
   @keyframes pulse{50%{opacity:.35;transform:scale(.85)}}
+  .node .sk{margin-top:9px;display:flex;flex-wrap:wrap;gap:5px}
+  .node .sk span{font-family:ui-monospace,"Roboto Mono",monospace;font-size:11.5px;color:#b6e3ff;
+    border:1px solid rgba(150,215,255,.5);border-radius:5px;padding:2px 7px;letter-spacing:.2px}
 
   .wlabel{position:absolute;font-size:11px;letter-spacing:3px;text-transform:uppercase;
     color:var(--muted);opacity:.6}
 
   /* ---- fixed HUD (does not move with camera) ---- */
-  .hud{position:absolute;z-index:6;pointer-events:none}
+  .hud{position:absolute;z-index:6;pointer-events:none;transition:opacity 1s ease}
+  #stage.cinematic #top,#stage.cinematic #chapter,#stage.cinematic #vo,
+  #stage.cliff #top,#stage.cliff #chapter,#stage.cliff #vo{opacity:0}
   #top{top:0;left:0;right:0;padding:34px 40px;display:flex;justify-content:space-between;align-items:flex-start}
   #brand{display:flex;align-items:center;gap:14px}
-  #logo{width:34px;height:34px;border-radius:9px;position:relative;
-    background:radial-gradient(circle at 35% 30%,#ffb27a,var(--accent) 60%,#7a2f00);
-    box-shadow:0 0 22px rgba(255,106,0,.7)}
-  #logo::after{content:"";position:absolute;inset:9px;border-radius:4px;background:#05070a}
+  #logo{width:42px;height:42px;object-fit:contain;
+    filter:drop-shadow(0 0 10px rgba(255,140,0,.6)) brightness(1.15)}
   #brand .t{font-weight:800;font-size:18px;letter-spacing:.5px}
   #brand .t span{color:var(--accent)}
   #brand .sub{font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-top:2px}
@@ -105,11 +113,14 @@
     background:linear-gradient(180deg,#fff,#7dd3fc);-webkit-background-clip:text;background-clip:text;color:transparent}
   #sceneno .tot{font-size:12px;color:var(--muted);letter-spacing:2px}
 
-  #chapter{position:absolute;z-index:6;left:40px;top:120px;pointer-events:none}
-  #chapter .kick{font-size:12px;letter-spacing:4px;color:var(--matrix);text-transform:uppercase;
+  #chapter{position:absolute;z-index:6;left:40px;right:40px;top:112px;pointer-events:none}
+  #chapter .kick{font-size:13px;letter-spacing:4px;color:var(--matrix);text-transform:uppercase;
     text-shadow:0 0 12px rgba(0,255,65,.6)}
-  #chapter h2{font-size:40px;font-weight:800;line-height:1.05;margin-top:8px;max-width:640px;
-    text-shadow:0 2px 30px rgba(0,0,0,.6)}
+  #chapter h2{font-size:46px;font-weight:800;line-height:1.06;margin-top:10px;max-width:720px;
+    color:#ffffff;text-shadow:0 3px 34px rgba(0,0,0,.85),0 0 2px rgba(0,0,0,.9)}
+  #chapter .res{margin-top:14px;display:inline-block;font-size:24px;font-weight:800;letter-spacing:.3px;
+    color:#ffb570;background:rgba(255,106,0,.13);border:1px solid rgba(255,106,0,.5);
+    border-radius:10px;padding:8px 16px;text-shadow:0 0 18px rgba(255,106,0,.45)}
 
   /* subtitle / VO */
   #vo{position:absolute;z-index:6;left:40px;right:40px;bottom:180px;pointer-events:none}
@@ -136,6 +147,85 @@
   #prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--matrix),var(--accent));
     box-shadow:0 0 10px var(--matrix);transition:width .25s linear}
 
+  /* boot / countdown overlay */
+  #boot{position:absolute;z-index:6;inset:0;display:grid;place-items:center;text-align:center;
+    opacity:0;pointer-events:none;transition:opacity 1.1s ease;
+    background:radial-gradient(60% 45% at 50% 45%,rgba(0,20,4,.35),rgba(0,4,1,.75))}
+  #stage.boot #boot{opacity:1}
+  #boot .kick2{font-size:14px;letter-spacing:7px;color:var(--matrix);text-transform:uppercase;
+    text-shadow:0 0 14px rgba(0,255,65,.7)}
+  #boot .count{font-size:210px;font-weight:800;line-height:1;color:var(--matrix);
+    text-shadow:0 0 40px rgba(0,255,65,.85),0 0 90px rgba(0,255,65,.5);
+    font-family:ui-monospace,"Roboto Mono","Courier New",monospace}
+  #boot .count.go{font-size:120px;letter-spacing:10px}
+  #boot .blines{margin-top:26px;font-size:13px;letter-spacing:2px;color:#6ee7a0;opacity:.8;
+    min-height:20px}
+  @keyframes countPop{0%{transform:scale(.6);opacity:0}25%{transform:scale(1);opacity:1}
+    80%{opacity:1}100%{transform:scale(1.25);opacity:0}}
+  #boot .count.tick{animation:countPop 1s ease}
+
+  /* cold-open — mysterious glitch line, no numbers */
+  #cold{position:absolute;z-index:6;inset:0;display:grid;place-items:center;text-align:center;
+    opacity:0;pointer-events:none;transition:opacity .8s ease;background:#04060a}
+  #stage.coldopen #cold{opacity:1}
+  #cold .l1{font-size:13px;letter-spacing:7px;color:var(--matrix);text-transform:uppercase;
+    text-shadow:0 0 12px rgba(0,255,65,.6);animation:flick 2.2s steps(2) infinite}
+  #cold .l2{margin-top:14px;font-size:22px;letter-spacing:2px;color:#9effb8}
+  @keyframes flick{48%{opacity:1}50%{opacity:.4}52%{opacity:1}}
+
+  /* word-hits during the wall shatter */
+  #hits{position:absolute;z-index:6;inset:0;display:grid;place-items:center;pointer-events:none}
+  #hits .w{font-size:66px;font-weight:800;letter-spacing:1px;color:#f8fafc;opacity:0;
+    text-align:center;max-width:960px;line-height:1.06;white-space:pre-line;
+    text-shadow:0 0 26px rgba(0,255,65,.45);transition:opacity .35s ease}
+  #hits .w.on{opacity:1;animation:hitIn .5s cubic-bezier(.2,.8,.2,1)}   /* enter, then HOLD until replaced */
+  @keyframes hitIn{0%{opacity:0;transform:scale(.84) skewX(-5deg);filter:blur(6px)}
+    60%{opacity:1;transform:scale(1) skewX(0);filter:blur(0)}
+    100%{opacity:1;transform:scale(1)}}
+  /* the product-name reveal (first hit) — branded, Recruitin oranje accent */
+  #hits .w.name{font-size:52px;letter-spacing:2px;color:#f8fafc;
+    text-shadow:0 0 30px rgba(255,106,0,.35),0 0 2px rgba(0,0,0,.8)}
+  #hits .w.name b{color:var(--accent);font-weight:800}
+
+  /* cliffhanger outro overlay */
+  #cliff{position:absolute;z-index:6;inset:0;display:grid;place-items:center;text-align:center;
+    opacity:0;pointer-events:none;transition:opacity 1.2s ease;
+    background:radial-gradient(55% 40% at 50% 40%,rgba(0,8,2,.4),rgba(2,3,5,.86))}
+  #stage.cliff #cliff{opacity:1}
+  #cliff .morph{width:280px;height:280px;object-fit:contain;
+    filter:drop-shadow(0 0 46px rgba(255,140,0,.55)) brightness(1.12);
+    animation:morphIn 2.4s cubic-bezier(.2,.7,.2,1)}
+  @keyframes morphIn{
+    0%{opacity:0;transform:scale(1.9) rotate(-140deg);filter:blur(22px) hue-rotate(90deg) brightness(1.6)}
+    55%{opacity:1;filter:blur(3px) hue-rotate(20deg) brightness(1.3)}
+    100%{opacity:1;transform:scale(1) rotate(0);filter:blur(0) hue-rotate(0) brightness(1.12)}}
+  #cliff .one{margin-top:22px;font-size:15px;letter-spacing:6px;color:var(--matrix);
+    text-transform:uppercase;text-shadow:0 0 12px rgba(0,255,65,.6)}
+  #cliff .big2{margin-top:12px;font-size:44px;font-weight:800;line-height:1.12;max-width:840px;color:#f8fafc}
+  #cliff .big2 span{color:var(--accent)}
+  #cliff .chips{margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;max-width:760px}
+  #cliff .chip{border:1px solid rgba(148,163,184,.4);border-radius:999px;padding:9px 16px;
+    font-size:14px;letter-spacing:1px;color:#cbd5e1;background:rgba(15,23,42,.5)}
+  #cliff .chip.next{border-color:var(--accent);color:#ffd7ad;box-shadow:0 0 18px -4px var(--accent)}
+  #cliff .cont{margin-top:30px;font-size:20px;letter-spacing:4px;color:var(--matrix);
+    text-transform:uppercase;text-shadow:0 0 14px rgba(0,255,65,.6)}
+
+  /* branded intro / outro card */
+  #brandcard{position:absolute;z-index:6;inset:0;display:grid;place-items:center;
+    text-align:center;opacity:0;pointer-events:none;transition:opacity 1s ease;
+    background:radial-gradient(60% 40% at 50% 42%,rgba(5,7,10,.55),rgba(5,7,10,.92))}
+  #stage.intro #brandcard{opacity:1}
+  #brandcard .hero{width:340px;height:340px;object-fit:contain;
+    filter:drop-shadow(0 0 42px rgba(255,140,0,.5)) brightness(1.12);
+    animation:heroIn 1.6s cubic-bezier(.22,.61,.36,1)}
+  @keyframes heroIn{from{opacity:0;transform:scale(.8) translateY(20px)}to{opacity:1;transform:none}}
+  #brandcard .wm{margin-top:26px;font-size:62px;font-weight:800;letter-spacing:8px;
+    color:#f8fafc}
+  #brandcard .wm b{color:var(--accent);font-weight:800}
+  #brandcard .tag{margin-top:6px;font-size:20px;letter-spacing:2px;color:#cbd5e1;font-style:italic}
+  #brandcard .boot{margin-top:34px;font-size:13px;letter-spacing:5px;color:var(--matrix);
+    text-transform:uppercase;text-shadow:0 0 12px rgba(0,255,65,.5)}
+
   /* intro / finale flourish text */
   #finaleTxt{position:absolute;z-index:6;inset:0;display:grid;place-items:center;
     text-align:center;opacity:0;transition:opacity 1s ease;pointer-events:none}
@@ -146,6 +236,12 @@
   #finaleTxt .small{margin-top:12px;font-size:16px;letter-spacing:4px;color:var(--muted);text-transform:uppercase}
 
   .hint{position:fixed;bottom:10px;left:12px;z-index:9;color:#475569;font-size:12px}
+  #soundhint{position:absolute;z-index:8;top:26px;left:50%;transform:translateX(-50%);
+    background:rgba(0,0,0,.6);border:1px solid var(--matrix);border-radius:999px;
+    padding:11px 22px;color:var(--matrix);font-size:16px;letter-spacing:2px;
+    text-shadow:0 0 10px rgba(0,255,65,.6);box-shadow:0 0 22px -4px var(--matrix);
+    animation:sh 1.5s ease-in-out infinite;cursor:pointer}
+  @keyframes sh{50%{opacity:.5}}
 </style>
 </head>
 <body>
@@ -155,7 +251,7 @@
     <div id="grid"></div>
 
     <div id="world">
-      <svg id="wires" viewBox="0 0 1080 2520" preserveAspectRatio="none">
+      <svg id="wires" viewBox="0 0 1080 2960" preserveAspectRatio="none">
         <defs>
           <marker id="arrow" markerWidth="9" markerHeight="9" refX="6" refY="3"
             orient="auto" markerUnits="strokeWidth">
@@ -169,7 +265,7 @@
     <!-- HUD -->
     <div id="top" class="hud">
       <div id="brand">
-        <div id="logo"></div>
+        <img id="logo" src="assets/recruitin-mark.png" alt="Recruitin" />
         <div>
           <div class="t">RECRUITIN <span>·</span> AI AGENCY</div>
           <div class="sub">SYS://Omnichannel_Content_OS</div>
@@ -181,12 +277,57 @@
     <div id="chapter" class="hud">
       <div class="kick mono" id="ckick">// booting</div>
       <h2 id="ctitle">De Bron &amp; Orkestratie</h2>
+      <div class="res" id="cres" style="display:none"></div>
+    </div>
+
+    <div id="boot">
+      <div>
+        <div class="kick2 mono">Initializing construct</div>
+        <div class="count mono" id="count">3</div>
+        <div class="blines mono" id="blines">loading code fragments…</div>
+      </div>
+    </div>
+
+    <div id="cold">
+      <div>
+        <div class="l1 mono">// signal acquired</div>
+        <div class="l2 mono" id="coldl">AI-OS RECRUITMENT SYSTEM</div>
+      </div>
+    </div>
+
+    <div id="hits"><div class="w" id="hitw"></div></div>
+
+    <div id="cliff">
+      <div>
+        <img class="morph" src="assets/recruitin-mark.png" alt="Recruitin" />
+        <div class="one mono">// module 01 / ∞</div>
+        <div class="big2">Dit was <span>één module</span> van het AI-OS recruitmentsysteem.</div>
+        <div class="chips">
+          <span class="chip">SEO Content OS ✓</span>
+          <span class="chip next">Sourcing Agent</span>
+          <span class="chip next">Screening AI</span>
+          <span class="chip next">Interview Copilot</span>
+          <span class="chip next">Match Engine</span>
+        </div>
+        <div class="cont mono">wordt vervolgd →</div>
+      </div>
+    </div>
+
+    <div id="brandcard">
+      <div>
+        <img class="hero" src="assets/recruitin-mark.png" alt="Recruitin" />
+        <div class="wm">recru<b>i</b>t<b>i</b>n</div>
+        <div class="tag">the right people, right now</div>
+        <div class="boot mono">// Omnichannel AI Content OS — v3.0</div>
+      </div>
     </div>
 
     <div id="finaleTxt">
       <div>
+        <img class="hero" src="assets/recruitin-mark.png" alt="Recruitin"
+          style="width:120px;height:120px;object-fit:contain;filter:drop-shadow(0 0 30px rgba(255,140,0,.55));margin-bottom:20px" />
         <div class="big">WELKOM IN DE <span>MATRIX</span></div>
-        <div class="small mono">24/7 autonoom · omnichannel vliegwiel</div>
+        <div class="small mono">Recruitin · 24/7 autonoom omnichannel vliegwiel</div>
       </div>
     </div>
 
@@ -207,10 +348,17 @@
       </div>
     </div>
     <div id="prog"><i></i></div>
+    <div id="soundhint" class="mono">🔊 tik voor geluid</div>
+
+    <!-- Voice-over (hosted). Neo = diepe Caspian-hook; NL = Orion-narratie.
+         Swap to self-contained assets/*.mp3 zodra de bestanden lokaal staan. -->
+    <audio id="aNeo" preload="auto" src="assets/neo.mp3"></audio>
+    <audio id="aNar" preload="auto" src="assets/vo-nl.mp3"></audio>
   </div>
 </div>
 <div class="hint mono">← → wisselt scenes · spatie = play/pauze</div>
 
+<script src="assets/neo-mask.js"></script>
 <script>
 /* ============================================================
    OMNICHANNEL AI AGENCY — animated architecture (self-contained)
@@ -222,67 +370,119 @@ const C = { green:'#22c55e', purple:'#a855f7', blue:'#3b82f6', sky:'#38bdf8',
   orange:'#f97316', pink:'#ec4899', red:'#ef4444', cyan:'#22d3ee', emerald:'#10b981' };
 
 const NODES = [
-  {id:'mon',   c:C.green,  ic:'📡', hd:'Recruitment-Monitor', b:'Wekelijkse data-scan (.json)',        s:'Payload actief',   x:90,  y:120,  w:380,h:150},
-  {id:'obs',   c:C.purple, ic:'🔮', hd:'Obsidian Vault',      b:'Merkstem · SEO-pijlers · templates (SSOT)', s:'Lokale sync', x:610, y:120,  w:380,h:150},
-  {id:'stitch',c:C.blue,   ic:'☁️', hd:'Google Stitch',       b:'Centrale Content Planner · Orkestrator',    s:'State manager',x:330, y:390,  w:420,h:160},
-  {id:'router',c:C.orange, ic:'🔀', hd:'LiteLLM Router',      b:'Leest Obsidian-YAML · dynamische taakverdeling', s:'AI processing', x:330,y:670,w:420,h:160},
-  {id:'haiku', c:C.orange, ic:'⚡', hd:'Claude Haiku',        b:'Triage · meta-titels · slugs',              s:'Snel & goedkoop', x:50, y:950, w:300,h:160},
-  {id:'sonnet',c:C.orange, ic:'🎯', hd:'Claude Sonnet 5',     b:'Outline · code · copywriting',              s:'Hoge precisie',  x:390,y:950, w:300,h:160},
-  {id:'gemini',c:C.orange, ic:'🧠', hd:'Gemini 3.1 Pro',      b:'Long-form · grote datasets (RAG)',          s:'Groot geheugen', x:730,y:950, w:300,h:160},
-  {id:'apify', c:C.cyan,   ic:'🕷️', hd:'Apify · SERP',        b:'Scrapt top-10 concurrenten',                s:'Research',       x:50, y:1230,w:300,h:150},
-  {id:'media', c:C.pink,   ic:'🎨', hd:'Leonardo / Kling',    b:'Featured images & video',                   s:'Genereren',      x:390,y:1230,w:300,h:150},
-  {id:'supa',  c:C.purple, ic:'🗄️', hd:'Supabase',            b:'Database · storage · concept samenvoegen',  s:'Online',         x:730,y:1230,w:300,h:150},
-  {id:'seo',   c:C.green,  ic:'📝', hd:'SEO Blog-Writer',     b:'Website · interne links',                   s:'Informatief',    x:40, y:1520,w:242,h:180},
-  {id:'licorp',c:C.blue,   ic:'🏢', hd:'LinkedIn Bedrijf',    b:'B2B-carrousels (Placid)',                   s:'Autoriteit',     x:300,y:1520,w:242,h:180},
-  {id:'liper', c:C.sky,    ic:'👤', hd:'LinkedIn Persoonlijk',b:'H2H · dwell time · candid',                 s:'Empathie',       x:560,y:1520,w:242,h:180},
-  {id:'meta',  c:C.orange, ic:'🎯', hd:'Meta Ad Copywriter',  b:'Leadgen & sollicitanten',                   s:'Actiegericht',   x:820,y:1520,w:242,h:180},
-  {id:'brand', c:C.red,    ic:'🛡️', hd:'Brand & Compliance',  b:'Controleert toon & huisstijl',              s:'Check',          x:210,y:1810,w:300,h:150},
-  {id:'aia',   c:C.cyan,   ic:'🧬', hd:'Algorithm Intelligence', b:'Live algoritme-check Meta / LinkedIn',   s:'Beschermt bereik',x:560,y:1810,w:320,h:150},
-  {id:'cowork',c:C.red,    ic:'⏸️', hd:'Cowork Wait-State',   b:'Menselijke review · goedkeuring',           s:'Wacht op review',x:330,y:2070,w:420,h:150},
-  {id:'out',   c:C.emerald,ic:'🚀', hd:'Omnichannel Out',     b:'WordPress · LinkedIn · Meta · Buffer',      s:'Live',           x:330,y:2330,w:420,h:160},
+  // ── Laag 0 · Bron & trigger ─────────────────────────────
+  {id:'mon',   c:C.green,  ic:'📡', hd:'Recruitment-Monitor', b:'Wekelijkse scan van recruitment-updates → payload (.json / .md)', s:'Bron · brandstof', x:40, y:110, w:320,h:170},
+  {id:'trig',  c:C.green,  ic:'⚡', hd:'Cloud Trigger',       b:'Webhook of cronjob start de workflow',      s:'Start-signaal',  x:400,y:110, w:280,h:170},
+  {id:'obs',   c:C.purple, ic:'🔮', hd:'Obsidian Vault',      b:'Instructies v5 · tone of voice · buyer persona\'s · SEO-pijlers · templates (SSOT)', s:'Leest YAML · lokale sync', x:720,y:110, w:320,h:170},
+  // ── Laag 2 · Orkestratie ────────────────────────────────
+  {id:'stitch',c:C.blue,   ic:'⚙️', hd:'Content Orchestrator', b:'Eigen workflow-engine · centrale cloud-workflows · content-planner', s:'State manager · orkestrator', x:330,y:420,w:420,h:170},
+  // ── Laag 3 · Dynamische model-router ────────────────────
+  {id:'router',c:C.orange, ic:'🔀', hd:'LiteLLM Router',      b:'Leest Obsidian-YAML · kiest model per taak → executie-fase', s:'Dynamische routing', x:330,y:720,w:420,h:160},
+  {id:'haiku', c:C.orange, ic:'⚡', hd:'Claude Haiku',        b:'Triage & filtering',                        s:'Snel & goedkoop', x:40, y:980, w:300,h:150},
+  {id:'sonnet',c:C.orange, ic:'🎯', hd:'Claude Sonnet 5',     b:'Code & copywriting',                        s:'Hoge precisie',  x:390,y:980, w:300,h:150},
+  {id:'gemini',c:C.orange, ic:'🧠', hd:'Gemini 3.1 Pro',      b:'Grote datasets (PDF/CSV) · RAG',            s:'Groot geheugen', x:740,y:980, w:300,h:150},
+  // ── Laag 4 · Research & media tool stack ────────────────
+  {id:'apify', c:C.cyan,   ic:'🕷️', hd:'Apify · SERP',        b:'Scrapt top-10 concurrenten · zoekintentie, word-count, LSI', s:'SERP-research', x:40, y:1250,w:300,h:150},
+  {id:'leo',   c:C.pink,   ic:'🎨', hd:'Leonardo AI',         b:'Featured images',                           s:'Beeld',          x:390,y:1250,w:300,h:150},
+  {id:'kling', c:C.pink,   ic:'🎬', hd:'Kling',               b:'Video-generatie',                           s:'Beweging',       x:740,y:1250,w:300,h:150},
+  {id:'placid',c:C.blue,   ic:'📊', hd:'Placid / Bannerbear', b:'Carrousels & infographics in huisstijl',    s:'Corporate visuals',x:40, y:1430,w:300,h:150},
+  {id:'mj',    c:C.sky,    ic:'📸', hd:'Midjourney-agent',    b:'Ultra-realistische candid fotografie',      s:'Personal visuals',x:390,y:1430,w:300,h:150},
+  {id:'supa',  c:C.purple, ic:'🗄️', hd:'Supabase',            b:'Concept samenvoegen · database & storage · status-DB', s:'Assembly · online', x:740,y:1430,w:300,h:150},
+  // ── Laag 5 · Omnichannel content-splitsing ──────────────
+  {id:'seo',   c:C.green,  ic:'📝', hd:'SEO Blog-Writer',     b:'Long-form artikel · informatief → WordPress/Webflow', s:'Route 1 · Website', sk:['generate_seo_structure()','create_internal_links()'], x:20, y:1730,w:250,h:230},
+  {id:'licorp',c:C.blue,   ic:'🏢', hd:'LinkedIn · Bedrijf',  b:'Corporate & autoriteit · data-gedreven · \'wij\' · carrousels/PDF', s:'Route A · nieuwswaarde', x:283,y:1730,w:250,h:230},
+  {id:'liper', c:C.sky,    ic:'👤', hd:'LinkedIn · Persoonlijk',b:'Thought leadership · \'ik\' · candid · dwell time (5–10× bereik)', s:'Route B · empathie', x:546,y:1730,w:250,h:230},
+  {id:'meta',  c:C.orange, ic:'🎯', hd:'Meta Ad Copywriter',  b:'Actiegericht · leadgen & sollicitanten · carrousel', s:'Route 3 · Ads', x:809,y:1730,w:250,h:230},
+  // ── Laag 6 · Kwaliteit, merk & algoritme-bescherming ────
+  {id:'qgate', c:C.emerald,ic:'✅', hd:'Kwaliteits-Sluis',    b:'AI SEO-check · keyword-density · interne links · leesbaarheid', s:'Automatische QA', x:40, y:2040,w:300,h:170},
+  {id:'brand', c:C.red,    ic:'🛡️', hd:'Brand & Compliance',  b:'Brand Guardian + Compliance Counsel · huisstijl & Meta/LI-regels', s:'Merk & compliance', x:390,y:2040,w:300,h:170},
+  {id:'aia',   c:C.cyan,   ic:'🧬', hd:'Algorithm Intelligence', b:'Scant dev-blogs Meta/LinkedIn · realtime immuunsysteem', sk:['update_platform_guidelines()','audit_algorithm_match()'], s:'Beschermt bereik', x:740,y:2040,w:300,h:170},
+  // ── Laag 7 · Menselijke sluis ───────────────────────────
+  {id:'cowork',c:C.red,    ic:'⏸️', hd:'Cowork Wait-State',   b:'Orchestrator pauzeert · redacteur keurt goed', s:'Menselijke sluis', x:330,y:2320,w:420,h:150},
+  // ── Laag 8 · Publicatie + vliegwiel ─────────────────────
+  {id:'wp',    c:C.emerald,ic:'🌐', hd:'WordPress / Webflow', b:'Blog live via API',                         s:'Website',        x:40, y:2600,w:300,h:150},
+  {id:'liapi', c:C.blue,   ic:'💼', hd:'LinkedIn API',        b:'Inplannen (Buffer/ShareIn) · link-in-comments', s:'Bedrijf + persoonlijk', x:390,y:2600,w:300,h:150},
+  {id:'metaapi',c:C.orange,ic:'📣', hd:'Meta Marketing API',  b:'Ad-concept klaargezet',                     s:'Meta Ads',       x:740,y:2600,w:300,h:150},
 ];
 const N = Object.fromEntries(NODES.map(n=>[n.id,n]));
 
 const WIRES = [
-  ['mon','stitch'],['obs','stitch'],
+  // inputs → orchestrator
+  ['mon','stitch',{lab:'input-mcp'}],['trig','stitch'],['obs','stitch'],
+  // orchestrator → router → models
   ['stitch','router'],
-  ['router','haiku',{lab:'triage'}],['router','sonnet',{lab:'copy'}],['router','gemini',{lab:'longform'}],
-  ['stitch','apify'],['stitch','media'],
-  ['haiku','supa'],['sonnet','supa'],['gemini','supa'],['apify','supa'],['media','supa'],
+  ['router','haiku',{lab:'triage'}],['router','sonnet',{lab:'copy'}],['router','gemini',{lab:'data'}],
+  ['haiku','supa'],['sonnet','supa'],['gemini','supa'],
+  // orchestrator → tool stack → assembly
+  ['stitch','apify'],['stitch','leo'],['stitch','kling'],['stitch','placid'],['stitch','mj'],
+  ['apify','supa'],['leo','supa'],['kling','supa'],['placid','supa'],['mj','supa'],
+  // assembly → channels (+ tool→channel specialisation)
   ['supa','seo'],['supa','licorp'],['supa','liper'],['supa','meta'],
-  ['seo','brand'],['licorp','brand'],['liper','brand'],['meta','brand'],
-  ['brand','aia'],['aia','cowork'],['cowork','out'],
-  ['out','stitch',{feedback:true}],
+  ['placid','licorp'],['mj','liper'],
+  // channels → quality → brand → AIA → human gate
+  ['seo','qgate'],['licorp','qgate'],['liper','qgate'],['meta','qgate'],
+  ['qgate','brand'],['brand','aia'],['aia','cowork'],
+  // human gate → publish
+  ['cowork','wp'],['cowork','liapi'],['cowork','metaapi'],
+  // feedback flywheel
+  ['metaapi','stitch',{feedback:true}],
 ];
 
 /* ---------- 2. SCENES (camera + narration) ---------- */
 const F_W=1080, F_H=1920;
 const SCENES = [
-  { kick:'// fase 01 — input', title:'De Bron & Orkestratie',
-    cx:540, cy:340, sc:1.12, on:['mon','obs','stitch'],
-    vo:'Alles start bij de bron. Jouw wekelijkse recruitment-scan stroomt als data direct de Centrale Content Planner — Google Stitch — binnen. De Obsidian Vault levert merkstem, SEO-pijlers en templates als single source of truth.' },
+  { coldopen:true, rain:'off', kick:'', title:'',
+    cx:540, cy:1480, sc:0.52, on:[], dur:3, vo:'' },
 
-  { kick:'// fase 02 — routing', title:'De Dynamische Model Router',
-    cx:540, cy:870, sc:0.95, on:['router','haiku','sonnet','gemini'],
-    vo:'De Router leest de Obsidian-YAML en kiest per taak het juiste brein: Claude Haiku voor snelle triage, Claude Sonnet 5 voor precieze copy en code, en Gemini 3.1 Pro voor long-form en grote datasets.' },
+  { rise:true, rain:'build', kick:'', title:'',
+    cx:540, cy:1480, sc:0.52, on:[], dur:6, vo:'' },
 
-  { kick:'// fase 03 — tools & data', title:'Research, Media & Opslag',
-    cx:540, cy:1300, sc:1.05, on:['apify','media','supa'],
-    vo:'Parallel scrapt Apify de top-10 concurrenten, genereert Leonardo de beelden, en voegt Supabase alle losse elementen samen tot één compleet concept-artikel.' },
+  { neo:true, rain:'face', kick:'', title:'',
+    cx:540, cy:1480, sc:0.52, on:[], dur:9.5, vo:'' },   // Neo morpht & zegt "Welcome to the Matrix"
 
-  { kick:'// fase 04 — de splitsing', title:'De Omnichannel Splitsing',
-    cx:540, cy:1610, sc:0.98, on:['seo','licorp','liper','meta'],
-    vo:'Hier gebeurt de magie: één brononderwerp wordt uniek opgesplitst. Een SEO-blog voor je website, een B2B-carrousel voor je bedrijfspagina, een persoonlijk verhaal voor je profiel én actiegerichte Meta Ads.' },
+  { shatter:true, rain:'crumble', kick:'', title:'',
+    cx:540, cy:1480, sc:0.52, on:[], dur:10, vo:'' },   // muur brokkelt af + naam-reveal + word-hits → architectuur onthuld
 
-  { kick:'// fase 05 — de sluis', title:'Compliance & Algorithm Intelligence',
-    cx:540, cy:1970, sc:0.92, on:['brand','aia','cowork'],
-    vo:'Voordat er iets live gaat bewaakt de Brand Guardian je huisstijl, en scant de Algorithm Intelligence Agent realtime de regels van Meta en LinkedIn. Daarna wacht het systeem op jouw akkoord in de Cowork-sluis.' },
+  { kick:'// het begint met één scan', title:'Eén scan. De rest gaat vanzelf.', res:'0 blanco pagina’s',
+    cx:540, cy:250, sc:1.02, on:['mon','trig','obs'], dur:11,
+    vo:'Het begint met één wekelijkse scan van jouw vakgebied. Meer hoef jij niet te doen — het systeem weet al hoe jouw merk klinkt en waar jouw doelgroep op zit.' },
 
-  { kick:'// fase 06 — het vliegwiel', title:'Publicatie & Het Vliegwiel',
-    cx:540, cy:1290, sc:0.60, on:NODES.map(n=>n.id), finale:true,
-    vo:'Na goedkeuring publiceert het systeem volautomatisch naar al je kanalen. Het resultaat: een autonoom, omnichannel vliegwiel dat 24/7 jouw autoriteit bouwt en leads converteert. Welkom in de matrix.' },
+  { kick:'// alles vanuit één plek', title:'Alles geregeld vanuit één plek', res:'geen los geknutsel',
+    cx:540, cy:540, sc:1.12, on:['stitch','mon','trig','obs'], dur:8,
+    vo:'Eén centrale regisseur plant en bewaakt het hele proces. Jij hoeft niets te koppelen of in de gaten te houden — dat doet het systeem voor je.' },
+
+  { kick:'// slim én zuinig', title:'Het slimste brein, tegen de laagste kosten', res:'tot 90% goedkoper',
+    cx:540, cy:940, sc:0.9, on:['router','haiku','sonnet','gemini'], dur:11,
+    vo:'Voor elke taak kiest het systeem automatisch het beste én goedkoopste AI-model. Zware klussen slim, simpele klussen goedkoop — jij betaalt nooit te veel.' },
+
+  { kick:'// tekst én beeld, klaar', title:'Tekst én beeld, in één keer klaar', res:'geen aparte designer nodig',
+    cx:540, cy:1420, sc:0.88, on:['apify','leo','kling','placid','mj','supa'], dur:10,
+    vo:'Het systeem bekijkt de concurrentie en maakt de teksten, beelden en video’s er meteen bij. Alles kant-en-klaar, in jouw huisstijl.' },
+
+  { kick:'// één onderwerp, alle kanalen', title:'Eén onderwerp, vier kanalen op maat', res:'4× bereik, 0 kopieerwerk',
+    cx:540, cy:1845, sc:0.9, on:['seo','licorp','liper','meta'], dur:9,
+    vo:'Uit dat ene onderwerp maakt het systeem vier unieke versies: voor je website, voor LinkedIn en voor je advertenties. Nooit gekopieerd — elk kanaal krijgt z’n eigen toon.' },
+
+  { kick:'// meer bereik op LinkedIn', title:'Twee keer zoveel bereik op LinkedIn', res:'5–10× meer weergaven',
+    cx:540, cy:1845, sc:1.24, on:['licorp','liper'], dur:11,
+    vo:'Op LinkedIn plaatst het systeem slim vanaf je bedrijfspagina én je persoonlijke profiel. Zo bereik je veel meer mensen, zonder gedoe met dubbele content.' },
+
+  { kick:'// altijd binnen de regels', title:'Altijd on-brand en binnen de regels', res:'geen missers online',
+    cx:540, cy:2125, sc:0.9, on:['qgate','brand','aia'], dur:12,
+    vo:'Voordat er iets naar buiten gaat, controleert het systeem de kwaliteit, je huisstijl én de nieuwste regels van LinkedIn en Meta. Zo staat er nooit een misser online.' },
+
+  { kick:'// jij houdt de controle', title:'Jij geeft akkoord. Altijd.', res:'de mens beslist, niet de AI',
+    cx:540, cy:2540, sc:0.72, on:['cowork','wp','liapi','metaapi'], dur:9,
+    vo:'Niets gaat live zonder jouw akkoord. Jij houdt de eindcontrole; pas na jouw ‘ja’ publiceert het systeem naar al je kanalen.' },
+
+  { kick:'// het resultaat', title:'Ruim 20 uur per week terug', res:'24/7 zichtbaar, jij aan het roer',
+    cx:540, cy:1480, sc:0.5, on:NODES.map(n=>n.id), dur:9,
+    vo:'Het resultaat: één scan wordt jouw hele week aan content, op elk kanaal. Je wint zo’n twintig uur per week — en blijft continu zichtbaar bij de juiste mensen.' },
+
+  { cliff:true, rain:'full', kick:'// module 01 / ∞', title:'',
+    cx:540, cy:1480, sc:0.52, on:[], dur:8, vo:'' },
 ];
-const SCENE_MS = 8200;
+window.SCENE_DUR = SCENES.map(s => s.dur || 8); // seconds per scene, read by the recorder
 
 /* ---------- 3. BUILD DOM ---------- */
 const world = document.getElementById('world');
@@ -305,15 +505,40 @@ function path(a,b,feedback){
   const dy=(ty-sy)*0.45;
   return `M${sx},${sy} C${sx},${sy+dy} ${tx},${ty-dy} ${tx},${ty}`;
 }
-const wireEls=[];
-WIRES.forEach(([a,b,o])=>{
+const SVGNS='http://www.w3.org/2000/svg';
+const wireEls=[], pktEls=[];
+WIRES.forEach(([a,b,o],i)=>{
   o=o||{};
-  const p=document.createElementNS('http://www.w3.org/2000/svg','path');
-  p.setAttribute('d',path(a,b,o.feedback));
+  const d=path(a,b,o.feedback);
+  const p=document.createElementNS(SVGNS,'path');
+  p.setAttribute('id','wire'+i);
+  p.setAttribute('d',d);
   p.setAttribute('class','wire flow'+(o.feedback?' feedback':''));
   if(!o.feedback) p.setAttribute('marker-end','url(#arrow)');
   svg.appendChild(p);
   wireEls.push({el:p,a,b,feedback:!!o.feedback});
+
+  // travelling data packets — 2 per wire, staggered, with wire-varying frequency
+  const fb=!!o.feedback;
+  const dots = 1;
+  for(let k=0;k<dots;k++){
+    const c=document.createElementNS(SVGNS,'circle');
+    c.setAttribute('r', fb ? 6 : 5);
+    c.setAttribute('class','pkt'+(fb?' fb':''));
+    const am=document.createElementNS(SVGNS,'animateMotion');
+    const dur=(fb?4.2:2.6+((i*7+k*3)%5)*0.42); // varying cadence per wire/dot
+    am.setAttribute('dur',dur+'s');
+    am.setAttribute('begin', (-(((i*3+k*5)%9)*0.6)).toFixed(2)+'s');
+    am.setAttribute('repeatCount','indefinite');
+    am.setAttribute('keyPoints', fb?'0;1':'0;1');
+    am.setAttribute('keyTimes','0;1');
+    const mp=document.createElementNS(SVGNS,'mpath');
+    mp.setAttributeNS('http://www.w3.org/1999/xlink','href','#wire'+i);
+    mp.setAttribute('href','#wire'+i);
+    am.appendChild(mp); c.appendChild(am); svg.appendChild(c);
+    pktEls.push({el:c,a,b,feedback:fb});
+  }
+
   if(o.lab){
     const [sx,sy]=anchor(N[a],'b'),[tx,ty]=anchor(N[b],'t');
     const lb=document.createElement('div');
@@ -329,6 +554,7 @@ NODES.forEach(n=>{
   d.style.cssText+=`left:${n.x}px;top:${n.y}px;width:${n.w}px;min-height:${n.h}px;--nc:${n.c}`;
   d.innerHTML=`<div class="h"><span class="ic">${n.ic}</span>${n.hd}</div>
     <div class="b">${n.b}</div>
+    ${n.sk?`<div class="sk">${n.sk.map(x=>`<span>${x}</span>`).join('')}</div>`:''}
     <div class="s mono"><span class="dot"></span>${n.s}</div>`;
   world.appendChild(d); nodeEls[n.id]=d;
 });
@@ -346,6 +572,22 @@ let cur=-1, playing=true, timer=null, tStart=0, raf=null;
 const stage=document.getElementById('stage');
 const prog=document.querySelector('#prog i');
 
+/* ---- voice-over sync (Neo hook + NL narration), scene-driven ---- */
+const aNeo=document.getElementById('aNeo'), aNar=document.getElementById('aNar');
+let neoAT=null;
+const NEO_SCENE=2, NAR_FROM=3, NAR_TO=12;      // narration runs shatter → vliegwiel
+function aStop(a){ try{ a.pause(); a.currentTime=0; }catch(e){} }
+function syncAudio(i){
+  const s=SCENES[i]; clearTimeout(neoAT);
+  // Neo line: aligned with the talking mouth (speak starts ~3.4s into the neo scene)
+  if(i===NEO_SCENE){ aStop(aNeo); if(playing) neoAT=setTimeout(()=>{ if(cur===i&&playing) aNeo.play().catch(()=>{}); }, 3200); }
+  else aStop(aNeo);
+  // NL narration: begins at the shatter reveal, keeps playing through the architecture
+  if(s.shatter){ aNar.currentTime=0; if(playing) aNar.play().catch(()=>{}); }
+  else if(i>=NAR_FROM && i<=NAR_TO){ if(playing && aNar.paused) aNar.play().catch(()=>{}); }
+  else aStop(aNar);
+}
+
 function go(i,manual){
   i=(i+SCENES.length)%SCENES.length;
   cur=i; const s=SCENES[i];
@@ -355,39 +597,103 @@ function go(i,manual){
   // node highlight
   const set=new Set(s.on);
   NODES.forEach(n=>nodeEls[n.id].classList.toggle('on',set.has(n.id)));
-  // wire highlight
-  wireEls.forEach(w=>{
-    const active=set.has(w.a)&&set.has(w.b);
-    w.el.classList.toggle('on',active&&!w.feedback);
-    if(w.feedback) w.el.classList.toggle('on',s.finale);
-  });
+  // wire + data-packet highlight
+  const wireActive=w=> w.feedback ? (s.finale||s.cliff) : (set.has(w.a)&&set.has(w.b));
+  wireEls.forEach(w=>w.el.classList.toggle('on',wireActive(w)&&!w.feedback||(w.feedback&&(s.finale||s.cliff))));
+  pktEls.forEach(pk=>pk.el.classList.toggle('on',wireActive(pk)));
   // HUD
   document.getElementById('snum').textContent=String(i+1).padStart(2,'0');
   document.getElementById('ckick').textContent=s.kick;
   document.getElementById('ctitle').textContent=s.title;
+  const cres=document.getElementById('cres');
+  if(s.res){ cres.textContent=s.res; cres.style.display='inline-block'; }
+  else { cres.style.display='none'; }
   document.getElementById('votxt').textContent=s.vo;
   document.getElementById('clab').textContent='SCENE '+String(i+1).padStart(2,'0');
+  // reset intro timers/state on every scene change
+  scTimers.forEach(clearTimeout); scTimers=[];
+  blinkT.forEach(clearTimeout); speakT.forEach(clearTimeout); eyeGlow=0; mouthOpen=0;
+  wordT.forEach(clearTimeout); wordT=[];                    // clear any lingering word-hit
+  { const hw=document.getElementById('hitw'); if(hw) hw.classList.remove('on'); }
   stage.classList.toggle('finale',!!s.finale);
+  stage.classList.toggle('cliff',!!s.cliff);
+  const cine = !!(s.coldopen||s.rise||s.neo||s.shatter);
+  stage.classList.toggle('cinematic', cine);
+  stage.classList.toggle('coldopen', !!s.coldopen);
+  // architecture hidden through the cinematic intro; revealed as the wall shatters
+  world.style.opacity = (cine && !s.shatter) ? '0' : '1';
+  if(s.coldopen) runColdOpen();
+  if(s.neo){ schedule(3400,()=>{glitchBurst(600); speak(4900);},i); schedule(7200,()=>glitchBurst(500),i); }
+  if(s.shatter){ world.style.opacity='0'; schedule(1600,()=>{ world.style.opacity='1'; },i); showWords(i); }
+  setRain(s.rain || 'dim');
   [...dots.children].forEach((b,bi)=>b.classList.toggle('a',bi===i));
   // subtitle re-animate
   const vt=document.getElementById('votxt');
   vt.style.animation='none'; void vt.offsetWidth; vt.style.animation='';
   if(manual) restart();
+  syncAudio(i);
   tStart=performance.now();
 }
 function tick(now){
   if(playing){
-    const el=now-tStart, p=Math.min(el/SCENE_MS,1);
+    const el=now-tStart, p=Math.min(el/((SCENES[cur].dur||8)*1000),1);
     prog.style.width=(p*100)+'%';
     if(p>=1) go(cur+1);
   }
   raf=requestAnimationFrame(tick);
 }
 function restart(){ tStart=performance.now(); prog.style.width='0%'; }
+
+let cdTimers=[];
+function runCountdown(ms){
+  cdTimers.forEach(clearTimeout); cdTimers=[];
+  const el=document.getElementById('count'), bl=document.getElementById('blines');
+  const steps=[
+    {t:'3',     b:'loading code fragments…'},
+    {t:'2',     b:'decrypting datastream…'},
+    {t:'1',     b:'construct online.'},
+    {t:'ENTER', b:'wake up, Neo.', go:true},
+  ];
+  const each=ms/steps.length;
+  steps.forEach((st,k)=>cdTimers.push(setTimeout(()=>{
+    el.textContent=st.t;
+    el.classList.toggle('go',!!st.go);
+    el.classList.remove('tick'); void el.offsetWidth; el.classList.add('tick');
+    bl.textContent=st.b;
+  }, each*k)));
+}
+
+/* intro scheduling + overlays */
+let scTimers=[];
+function schedule(ms,fn,idx){ scTimers.push(setTimeout(()=>{ if(cur===idx) fn(); }, ms)); }
+let coldT=[];
+function runColdOpen(){ coldT.forEach(clearTimeout); coldT=[];
+  const el=document.getElementById('coldl'); if(!el) return;
+  const full='AI-OS RECRUITMENT SYSTEM'; el.textContent='▮';
+  for(let k=1;k<=full.length;k++) coldT.push(setTimeout(()=>{ el.textContent=full.slice(0,k)+'▮'; }, 220+k*48));
+}
+let wordT=[];
+function showWords(idx){ wordT.forEach(clearTimeout); wordT=[];
+  const el=document.getElementById('hitw'); if(!el) return; el.classList.remove('on'); el.innerHTML='';
+  // 1) reveal the product NAME, then 2) the result-punches — each held long enough to read
+  const seq=[
+    {h:'HET <b>AI-OS</b>\nRECRUITMENTSYSTEEM', name:true, hold:2400},
+    {h:'ÉÉN SCAN.',            hold:1500},
+    {h:'EEN WEEK CONTENT.',    hold:1500},
+    {h:'ALLE KANALEN.',        hold:1500},
+    {h:'20+ UUR/WEEK TERUG.',  hold:1800},
+  ];
+  let t=400;
+  seq.forEach((w)=>{ wordT.push(setTimeout(()=>{ if(cur!==idx)return;
+    el.innerHTML=w.h; el.classList.toggle('name',!!w.name);
+    el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); }, t)); t+=w.hold; });
+  wordT.push(setTimeout(()=>{ if(cur===idx) el.classList.remove('on'); }, t));
+}
 function setPlay(v){
   playing=v;
   document.getElementById('play').textContent=v?'⏸':'▶';
-  if(v) restart();
+  if(v){ restart(); syncAudio(cur); }
+  else { aNeo.pause(); aNar.pause(); }   // pause (keep position so resume continues)
 }
 document.getElementById('prev').onclick=()=>go(cur-1,true);
 document.getElementById('next').onclick=()=>go(cur+1,true);
@@ -397,31 +703,192 @@ addEventListener('keydown',e=>{
   else if(e.key==='ArrowLeft') go(cur-1,true);
   else if(e.key===' '){e.preventDefault(); setPlay(!playing);}
 });
+// browsers block audio until a user gesture — start it (and restart from the top) on first tap
+let audioKicked=false;
+function kickAudio(){ if(audioKicked) return; audioKicked=true;
+  const h=document.getElementById('soundhint'); if(h) h.style.display='none';
+  go(0,true);                       // replay from the top, now with sound
+}
+['pointerdown','touchstart','keydown'].forEach(ev=>addEventListener(ev,kickAudio));
 
-/* ---------- 5. MATRIX RAIN ---------- */
+/* ---------- 5. MATRIX RAIN — cinematic: off → build → full → face(blink+speak) → crumble ---------- */
 const rain=document.getElementById('rain'), rctx=rain.getContext('2d');
-const CH='アカサタナハマヤラワイキシチニヒミリウクスツヌフムユルエケセテネヘメレオコソトノホモヨロ0123456789$+=*/<>█▓'.split('');
-let cols,drops,fs=22;
+const CH=('アカサタナハマヤラワイキシチニヒミリウクスツヌフムユルエケセテネヘメレオコソトノホモヨロ'
+  +'ﾊﾐﾋｰｳｼﾅﾓﾆｻﾜﾂｵﾘｱﾎﾃﾏｹﾒｴｶｷﾑﾕﾗｾﾈｽﾀﾇﾉ0123456789$+=*/<>¦｜╌█▓').split('');
+const rC=()=>CH[(Math.random()*CH.length)|0];
+const FS=22;
+let RCOLS, drops, colOn, colSpd;
 function rinit(){
   rain.width=F_W; rain.height=F_H;
-  cols=Math.floor(F_W/fs);
-  drops=Array.from({length:cols},()=>Math.random()*-60);
+  RCOLS=Math.ceil(F_W/FS)+1;
+  drops=[]; colOn=[]; colSpd=[];
+  for(let i=0;i<RCOLS;i++){ drops[i]=Math.random()*-90; colOn[i]=Math.random(); colSpd[i]=0.4+Math.random()*0.8; }
 }
 rinit();
-function rdraw(){
-  rctx.fillStyle='rgba(5,7,10,.10)';
-  rctx.fillRect(0,0,F_W,F_H);
-  rctx.font=fs+'px "Courier New",monospace';
-  for(let i=0;i<cols;i++){
-    const ch=CH[Math.floor(Math.random()*CH.length)];
-    const x=i*fs, y=drops[i]*fs;
-    rctx.fillStyle= Math.random()>0.975 ? '#c7ffd6' : '#00ff41';
-    rctx.fillText(ch,x,y);
+
+/* ---- stylized "Neo" masks: face + eyes + mouth (offscreen, sampled by the rain) ---- */
+const FCX=F_W/2, FCY=F_H*0.44;
+const rr=(g,x,y,w,h,r)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);
+  g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();g.fill();};
+function mkMask(draw){ const c=document.createElement('canvas'); c.width=F_W; c.height=F_H;
+  const g=c.getContext('2d'); draw(g); return g.getImageData(0,0,F_W,F_H).data; }
+// FACE mask is derived from the uploaded Neo/Matrix frame (luminance → bright code chars).
+// Loaded from a data-URI (assets/neo-mask.js) so the canvas is never tainted.
+let FACE=null, FACE_Y=0, FACE_H=0;
+(function loadFace(){
+  if(!window.NEO_MASK) return;
+  const im=new Image();
+  im.onload=()=>{
+    const c=document.createElement('canvas'); c.width=F_W; c.height=F_H;
+    const g=c.getContext('2d');
+    const w=900, h=w*im.height/im.width, x=(F_W-w)/2, y=Math.round((F_H-h)/2)-60; // headroom
+    FACE_Y=y; FACE_H=h;
+    g.drawImage(im,x,y,w,h);
+    FACE=g.getImageData(0,0,F_W,F_H).data;
+  };
+  im.src=window.NEO_MASK;
+})();
+const EYES=mkMask((g)=>{ g.filter='blur(4px)'; g.fillStyle='#fff';
+  g.beginPath(); g.ellipse(FCX-120,FCY+2,50,18,0,0,7); g.fill();
+  g.beginPath(); g.ellipse(FCX+120,FCY+2,50,18,0,0,7); g.fill(); });
+const MOUTH=mkMask((g)=>{ g.filter='blur(5px)'; g.fillStyle='#fff';
+  g.beginPath(); g.ellipse(FCX,FCY+150,72,26,0,0,7); g.fill(); });
+// two hands/forearms raised to the sunglasses (the iconic Matrix Reloaded pose)
+const HANDS=mkMask((g)=>{
+  g.filter='blur(6px)'; g.fillStyle='#fff'; g.strokeStyle='#fff'; g.lineCap='round'; g.lineJoin='round';
+  g.lineWidth=56;                                   // forearms from lower sides up to the temples
+  g.beginPath(); g.moveTo(FCX-345,FCY+320); g.lineTo(FCX-255,FCY+120); g.lineTo(FCX-180,FCY-28); g.stroke();
+  g.beginPath(); g.moveTo(FCX+345,FCY+320); g.lineTo(FCX+255,FCY+120); g.lineTo(FCX+180,FCY-28); g.stroke();
+  g.beginPath(); g.ellipse(FCX-176,FCY-42,48,58,0.2,0,7); g.fill();   // hands at the temples
+  g.beginPath(); g.ellipse(FCX+176,FCY-42,48,58,-0.2,0,7); g.fill();
+  g.lineWidth=15;                                   // fingers reaching over the shades
+  g.beginPath(); g.moveTo(FCX-176,FCY-74); g.lineTo(FCX-116,FCY-54); g.stroke();
+  g.beginPath(); g.moveTo(FCX+176,FCY-74); g.lineTo(FCX+116,FCY-54); g.stroke();
+});
+const lumAt=(A,x,y)=>{ x|=0;y|=0; if(x<0||y<0||x>=F_W||y>=F_H)return 0; return A[(y*F_W+x)*4]/255; };
+
+/* ---- phase state ---- */
+let rainMode='dim', buildP=1, faceP=0, buildT=1, faceT=0;
+let eyeGlow=0, mouthOpen=0, glitchUntil=0;
+function glitchBurst(ms){ glitchUntil=performance.now()+(ms||800); }
+function setRain(mode){
+  if(mode==='off'){ rainMode='off'; buildP=1;buildT=1; faceP=0;faceT=0; }
+  else if(mode==='build'){ rainMode='build'; buildP=0;buildT=1; faceP=0;faceT=0; }
+  else if(mode==='face'){ rainMode='full'; buildP=1;buildT=1; faceT=1; }
+  else if(mode==='dim'){ rainMode='dim'; buildP=1;buildT=1; faceT=0; }
+  else if(mode==='crumble'){ startCrumble(); }
+  else { rainMode='full'; buildP=1;buildT=1; faceT=0; }
+}
+// Neo blinks (eyes flash open through the shades, then shut) ×2
+let blinkT=[];
+function blink(){ blinkT.forEach(clearTimeout); blinkT=[];
+  [[160,1],[320,0],[820,1],[980,0]].forEach(([t,v])=>blinkT.push(setTimeout(()=>{eyeGlow=v;},t))); }
+// Neo speaks "Welcome to the Matrix" — mouth open/close on the syllables (~1.6s)
+let speakT=[];
+function speak(ms){ speakT.forEach(clearTimeout); speakT=[]; ms=ms||4900;
+  let t=100;
+  while(t<ms-200){
+    const on=110+Math.random()*100, off=80+Math.random()*150;
+    speakT.push(setTimeout(()=>{mouthOpen=1;}, t));
+    speakT.push(setTimeout(()=>{mouthOpen=0;}, t+on));
+    t += on+off;
+  }
+  speakT.push(setTimeout(()=>{mouthOpen=0;}, ms)); }
+
+/* ---- wall shatter (crumble): green rain freezes into a wall of bricks that fall away ---- */
+let bricks=null, crumbleT0=0; const BW=48, BH=40;
+function startCrumble(){
+  rainMode='crumble'; bricks=[];
+  const cols=Math.ceil(F_W/BW), rows=Math.ceil(F_H/BH);
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    bricks.push({x:c*BW,y:r*BH,vy:0,vx:(Math.random()-.5)*1.3,rot:0,
+      vr:(Math.random()-.5)*0.2, delay:Math.pow(Math.random(),0.6)*1500, ch:rC(), a:1});
+  }
+  crumbleT0=performance.now();
+}
+function drawCrumble(now){
+  // keep the SAME green rain streaming behind the falling wall → no abrupt "other rain" after Neo
+  rctx.fillStyle='rgba(5,7,10,.10)'; rctx.fillRect(0,0,F_W,F_H);
+  rctx.font=FS+'px "Courier New",monospace';
+  for(let i=0;i<RCOLS;i++){
+    const x=i*FS, y=drops[i]*FS;
+    const head=Math.random()>0.965;
+    rctx.fillStyle = head ? 'rgba(199,255,214,0.9)' : 'rgba(0,255,65,0.9)';
+    rctx.fillText(rC(),x,y);
     if(y>F_H && Math.random()>0.975) drops[i]=0;
-    drops[i]+= 0.55 + Math.random()*0.5;
+    drops[i]+= colSpd[i];
+  }
+  const t=now-crumbleT0;
+  for(const b of bricks){
+    if(t>b.delay){ b.vy+=0.7; b.y+=b.vy; b.x+=b.vx; b.rot+=b.vr; b.a-=0.011; }
+    if(b.a<=0||b.y>F_H+BH) continue;
+    rctx.save(); rctx.translate(b.x+BW/2,b.y+BH/2); rctx.rotate(b.rot);
+    // slab of green code chars — same colour/density as the rain (no dark tiles) → smooth transition
+    for(let cy2=-BH/2+FS; cy2<=BH/2; cy2+=FS){
+      for(let cx2=-BW/2+3; cx2<BW/2-3; cx2+=FS){
+        if(Math.random()>0.30){
+          rctx.fillStyle = Math.random()>0.9 ? 'rgba(200,255,214,'+b.a+')' : 'rgba(0,255,65,'+(0.85*b.a)+')';
+          rctx.fillText(rC(), cx2, cy2);
+        }
+      }
+    }
+    rctx.restore();
   }
 }
-setInterval(rdraw,55);
+
+function rdraw(){
+  const now=performance.now();
+  buildP += (buildT-buildP)*0.032;
+  faceP  += (faceT-faceP)*(faceT>faceP?0.016:0.06);
+  if(rainMode==='build' && buildP>0.985) rainMode='full';
+  if(rainMode==='crumble'){ drawCrumble(now); return; }
+  const dim = rainMode==='dim';
+  // same trail-fade + speed in every phase → the rain never "switches" look after Neo
+  rctx.fillStyle = dim ? 'rgba(5,7,10,.11)' : 'rgba(5,7,10,.085)';
+  rctx.fillRect(0,0,F_W,F_H);
+  if(rainMode==='off' && faceP<0.02) return;
+  rctx.font=FS+'px "Courier New",monospace';
+  if(rainMode!=='off'){
+    for(let i=0;i<RCOLS;i++){
+      if(rainMode==='build' && colOn[i]>buildP) continue;
+      const x=i*FS, y=drops[i]*FS;
+      const head=Math.random()>0.965;
+      rctx.fillStyle = head ? 'rgba(199,255,214,'+(dim?0.6:1)+')' : 'rgba(0,255,65,'+(dim?0.5:0.9)+')';
+      rctx.fillText(rC(),x,y);
+      if(y>F_H && Math.random()>0.975) drops[i]=0;
+      drops[i]+= colSpd[i];                          // identical fall speed in dim & full
+    }
+  }
+  // face reveal — Neo (incl. the hands adjusting the shades) built from code, fine grid + glitch surge
+  if(faceP>0.02 && FACE){
+    const gl = now < glitchUntil, FG=13;
+    // dome over just the CROWN band — rounds the flat-cut top, leaves hair/hands wide below
+    const HCX=F_W/2, CROWNy=FACE_Y+165, HRX=235, HRY=185;
+    rctx.font='13px "Courier New",monospace';
+    for(let gy=FG; gy<F_H; gy+=FG){
+      const rowGl = gl && Math.random()>0.85;
+      const jx = gl ? ((Math.random()*2-1)*8)|0 : 0;
+      for(let gx=0; gx<F_W; gx+=FG){
+        const lum=lumAt(FACE,gx,gy);
+        if(lum<0.09) continue;                                   // lower → full head/hair renders (not "cut")
+        let edge=1;
+        if(gy < CROWNy){                                         // arch the flat crown into a round head
+          const ex=(gx-HCX)/HRX, ey=(gy-CROWNy)/HRY, ed=ex*ex+ey*ey;
+          if(ed>1) continue;
+          if(ed>0.72) edge=Math.max(0,1-(ed-0.72)/0.28);        // feather to a soft round edge
+        }
+        let a=Math.min(1, Math.pow(lum,1.05)*faceP*2.3)*edge;
+        if(rowGl) a*=0.4;
+        rctx.fillStyle = lum>0.5 ? 'rgba(224,255,232,'+a+')' : 'rgba(55,242,116,'+(a*0.92)+')';
+        rctx.fillText(rC(), gx+(rowGl?jx*3:jx), gy);
+        if(mouthOpen>0.25 && Math.abs(gx-F_W/2)<70 && Math.abs(gy-(FACE_Y+FACE_H*0.66))<mouthOpen*26){
+          rctx.fillStyle='rgba(5,7,10,0.92)'; rctx.fillRect(gx-2,gy-11,15,14);   // talking mouth (dark gap)
+        }
+      }
+    }
+  }
+}
+setInterval(rdraw,40);
 
 /* ---------- 6. FIT STAGE TO VIEWPORT ---------- */
 function fit(){

@@ -12,8 +12,10 @@ scènes die samen de complete procesflow van A tot Z tonen.
 
 ## Bekijken
 
-Open `index.html` in een browser. Meer is niet nodig — alles zit in dat ene
-bestand (HTML + CSS + vanilla JS + canvas Matrix-rain).
+Open `index.html` in een browser. De presentatie is één bestand (HTML + CSS +
+vanilla JS + canvas Matrix-rain); de enige externe asset is het Recruitin-logo
+in `assets/recruitin-mark.png`, dus houd de map `assets/` naast `index.html`.
+Er is een gebrande **intro** (logo-reveal) en **outro** ("Welkom in de matrix").
 
 **Bediening**
 - `▶ / ⏸` — autoplay aan/uit (8,2s per scène)
@@ -32,57 +34,82 @@ Static site, geen build. `netlify.toml` staat al klaar:
 
 ## De architectuur (van A tot Z)
 
-| Fase | Node(s) | Rol |
+| Laag | Node(s) | Rol |
 |------|---------|-----|
-| **1. Bron** | Recruitment-Monitor · Obsidian Vault | Wekelijkse data-scan (.json) + merkstem/SEO-pijlers/templates als single source of truth |
-| **2. Orkestratie** | Google Stitch | Centrale Content Planner / cloud-orkestrator & state manager |
-| **3. Routing** | LiteLLM Router → Claude Haiku / Claude Sonnet 5 / Gemini 3.1 Pro | Leest Obsidian-YAML en kiest per taak het juiste model (triage / copy / long-form) |
-| **3b. Tools & data** | Apify · Leonardo/Kling · Supabase | SERP-scrape, media-generatie, concept samenvoegen & opslaan |
-| **4. Omnichannel splitsing** | SEO Blog-Writer · LinkedIn Bedrijf · LinkedIn Persoonlijk · Meta Ad Copywriter | Eén brononderwerp → vier unieke kanaalversies |
-| **5. Sluis** | Brand & Compliance · Algorithm Intelligence Agent · Cowork Wait-State | Huisstijl-check, live algoritme-check (Meta/LI) en menselijke goedkeuring |
-| **6. Publicatie** | Omnichannel Out | WordPress · LinkedIn · Meta · Buffer — plus feedback-loop terug naar Stitch |
+| **0. Bron & trigger** | Recruitment-Monitor · Cloud Trigger (+ custom input-MCP) | Wekelijkse scan van recruitment-updates → payload (.json/.md); webhook/cronjob start-signaal |
+| **1. Kennis / SSOT** | Obsidian Vault | Instructies v5 · tone of voice · buyer persona's · SEO-pijlers · templates (SSOT), gelezen als YAML |
+| **2. Orkestratie** | Content Orchestrator (eigen workflow-engine) | Centrale cloud-workflows · content-planner · state manager |
+| **3. Model-router** | LiteLLM Router → Claude Haiku / Sonnet 5 / Gemini 3.1 Pro | Leest YAML, kiest per taak het juiste én goedkoopste model (triage / code & copy / grote datasets) → executie-fase |
+| **4. Research & media** | Apify SERP · Leonardo · Kling · Placid/Bannerbear · Midjourney · Supabase | Concurrentie-scrape, beeld & video, corporate/candid visuals, concept samenvoegen & status-DB |
+| **5. Omnichannel-splitsing** | SEO Blog-Writer · LinkedIn Bedrijf (Route A) · LinkedIn Persoonlijk (Route B) · Meta Ad Copywriter | Eén onderwerp → vier unieke kanaalversies; LinkedIn **dual-track** omzeilt de straf op dubbele content |
+| **6. Kwaliteit, merk & AIA** | Interne Kwaliteits-Sluis · Brand Guardian + Compliance Counsel · Algorithm Intelligence Agent | AI SEO-check; huisstijl & compliance; realtime immuunsysteem tegen algoritme-wijzigingen |
+| **7. Menselijke sluis** | Cowork Wait-State | Orchestrator pauzeert tot de redacteur goedkeurt |
+| **8. Publicatie + vliegwiel** | WordPress/Webflow · LinkedIn API (Buffer/ShareIn) · Meta Marketing API | Live/ingepland; feedback-loop (statusupdate) terug naar de orchestrator = autonoom vliegwiel |
+
+**Agent-skills** zichtbaar in de animatie: SEO Blog-Writer — `generate_seo_structure()`,
+`create_internal_links()`; Algorithm Intelligence Agent — `update_platform_guidelines()`,
+`audit_algorithm_match()`.
 
 De oranje gestippelde lijn is de **feedback-loop**: statusupdates stromen vanuit
-de publicatie terug naar Google Stitch — het autonome vliegwiel.
+de publicatie terug naar de orchestrator — het autonome vliegwiel. Gloeiende
+data-pakketjes lopen over elke verbinding mee (incl. de feedback-kabel terug).
 
-## Voice-over script (NL, je/jouw-vorm)
+## Voice-over script (NL, resultaat-gedreven — voor de niet-technische beslisser)
 
-De ondertitels in de animatie zijn tegelijk het VO-script. Geschikt voor een
-ElevenLabs-avatar; totale spreektijd ± 55–65 seconden. Regie-aanwijzing per
-scène tussen haakjes.
+De VO is bewust omgebouwd van *techniek-uitleg* naar *wat het oplevert*, in
+gewone taal en geruststellend van toon — gericht op een HR-manager of
+bureau-eigenaar, niet op een systeemarchitect. Twee sprekers:
 
-**Scene 1 — De Bron & Orkestratie** *(rustig, opbouwend)*
-> Alles start bij de bron. Jouw wekelijkse recruitment-scan stroomt als data
-> direct de Centrale Content Planner — Google Stitch — binnen. De Obsidian Vault
-> levert merkstem, SEO-pijlers en templates als single source of truth.
+1. **Neo-hook** (diepe, trage stem) over de intro-scène — de scroll-stopper.
+   > Welcome… to the Matrix… of the AI-OS recruitment system.
+2. **Nederlandse narratie** (Orion, ± 1:34) — start zodra de muur afbrokkelt en
+   loopt door t/m het vliegwiel. Opent met een resultaat-hook, daarna één
+   duidelijke belofte per scène.
 
-**Scene 2 — De Dynamische Model Router** *(technisch, zelfverzekerd)*
-> De Router leest de Obsidian-YAML en kiest per taak het juiste brein: Claude
-> Haiku voor snelle triage, Claude Sonnet 5 voor precieze copy en code, en
-> Gemini 3.1 Pro voor long-form en grote datasets.
+**Hook — bij de reveal** *(nieuwsgierig)*
+> Wat als één druk op de knop je hele week aan recruitment-content oplevert?
+> Automatisch. En jij houdt altijd de controle.
 
-**Scene 3 — Research, Media & Opslag** *(vlot)*
-> Parallel scrapt Apify de top-10 concurrenten, genereert Leonardo de beelden,
-> en voegt Supabase alle losse elementen samen tot één compleet concept-artikel.
+**Eén scan** — *0 blanco pagina's*
+> Het begint met één wekelijkse scan van jouw vakgebied. Meer hoef jij niet te
+> doen; het systeem weet al hoe jouw merk klinkt, en waar jouw doelgroep op zit.
 
-**Scene 4 — De Omnichannel Splitsing** *(enthousiast — de climax van de flow)*
-> Hier gebeurt de magie: één brononderwerp wordt uniek opgesplitst. Een SEO-blog
-> voor je website, een B2B-carrousel voor je bedrijfspagina, een persoonlijk
-> verhaal voor je profiel én actiegerichte Meta Ads.
+**Vanuit één plek** — *geen los geknutsel*
+> Eén centrale regisseur plant en bewaakt het hele proces. Jij hoeft niets te
+> koppelen of in de gaten te houden.
 
-**Scene 5 — Compliance & Algorithm Intelligence** *(krachtig, geruststellend)*
-> Voordat er iets live gaat bewaakt de Brand Guardian je huisstijl, en scant de
-> Algorithm Intelligence Agent realtime de regels van Meta en LinkedIn. Daarna
-> wacht het systeem op jouw akkoord in de Cowork-sluis.
+**Slim én zuinig** — *tot 90% goedkoper*
+> Voor elke taak kiest het systeem automatisch het beste én goedkoopste model.
+> Zware klussen slim, simpele klussen goedkoop. Jij betaalt nooit te veel.
 
-**Scene 6 — Publicatie & Het Vliegwiel** *(uitnodigend, zoomt uit)*
-> Na goedkeuring publiceert het systeem volautomatisch naar al je kanalen. Het
-> resultaat: een autonoom, omnichannel vliegwiel dat 24/7 jouw autoriteit bouwt
-> en leads converteert. Welkom in de matrix.
+**Tekst én beeld** — *geen aparte designer nodig*
+> Het bekijkt de concurrentie, en maakt de teksten, beelden en video's er meteen
+> bij. Alles kant-en-klaar, in jouw huisstijl.
 
-**ElevenLabs-tip:** stem met hoge autoriteit maar conversationele toon (bijv.
-Callum of Marcus), Stability ± 35%. Forceer pauzes tussen scènes met
-`<break time="1.0s" />` om de VO exact op de camera-overgangen te synchroniseren.
+**Eén onderwerp, vier kanalen** — *4× bereik, 0 kopieerwerk*
+> Uit dat ene onderwerp maakt het systeem vier unieke versies: voor je website,
+> voor LinkedIn, en voor je advertenties. Nooit gekopieerd.
+
+**LinkedIn dual-track** — *5–10× meer weergaven*
+> Op LinkedIn plaatst het slim vanaf je bedrijfspagina én je persoonlijke
+> profiel. Zo bereik je veel meer mensen, zonder gedoe.
+
+**On-brand & compliant** — *geen missers online*
+> Voordat er iets naar buiten gaat, controleert het systeem de kwaliteit, je
+> huisstijl, en de nieuwste regels van LinkedIn en Meta. Zo staat er nooit een
+> misser online.
+
+**Jij beslist** — *de mens beslist, niet de AI*
+> En het allerbelangrijkste: niets gaat live zonder jouw akkoord. Jij houdt de
+> eindcontrole.
+
+**Het resultaat** — *ruim 20 uur per week terug*
+> Eén scan wordt jouw hele week aan content, op elk kanaal. Je wint zo'n twintig
+> uur per week. En je blijft continu zichtbaar, bij de juiste mensen.
+
+De schermtekst (`title` + oranje `res`-metric per scène in `SCENES`) loopt
+één-op-één mee met deze VO. De narratie (± 94s) valt over de architectuur-scènes;
+pas een zin aan, zet de bijbehorende `dur` gelijk, en re-render.
 
 ## Video-export (MP4) — voor ElevenLabs / CapCut
 
@@ -99,10 +126,13 @@ npx playwright install chromium   # of laat CHROMIUM_PATH wijzen naar een bestaa
 node scripts/record.js [uitvoer.mp4]
 ```
 
-Instellingen bovenaan `scripts/record.js`: `FPS`, `TRANSITION_MS` (duur van de
-camera-beweging per scène) en `DWELL_MS` (hoe lang elke scène blijft staan). De
-totale videolengte = `nScenes × (TRANSITION_MS + DWELL_MS)`. De MP4 heeft geen
-audio — de voice-over voeg je toe in je editor of ElevenLabs.
+De schermtijd per scène komt uit `window.SCENE_DUR` in `index.html` (seconden),
+zodat video en voice-over exact gelijk lopen: pas een VO-zin aan, zet de bijbehorende
+`dur` gelijk, en re-render. De huidige set (cinematische intro 23,5s +
+architectuur 90s + cliffhanger 8s) geeft ± 2:01 totaal, strak op de ± 1:46 VO.
+Valt `SCENE_DUR` weg, dan gebruikt de recorder de vaste `TRANSITION_MS +
+DWELL_MS` bovenaan `scripts/record.js`. De MP4 heeft geen audio — de voice-over
+leg je eronder in je editor of ElevenLabs.
 
 ## Aanpassen
 

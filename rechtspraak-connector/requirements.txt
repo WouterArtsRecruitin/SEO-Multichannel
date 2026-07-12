@@ -1,0 +1,6 @@
+# Core HTTP + config. XML parsing uses the Python standard library (xml.etree).
+requests>=2.31,<3
+PyYAML>=6.0,<7
+
+# --- Optional, only needed for the Supabase/Postgres exporter ---
+# psycopg[binary]>=3.1,<4

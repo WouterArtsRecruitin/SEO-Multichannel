@@ -40,9 +40,13 @@ function findFfmpeg() {
   return 'ffmpeg';
 }
 
-const W = 1080, H = 1920, FPS = 30;
+const FPS = 30;
 const OUT = process.argv[2] || path.resolve('dist/omnichannel-architecture-1080x1920.mp4');
-const FILE = 'file://' + path.resolve(__dirname, '..', 'index.html');
+// optional args: [outfile] [inputHtml] [WxH]   e.g. node record.js out.mp4 explainer-ecli/index.html 1920x1080
+const INPUT = process.argv[3] || 'index.html';
+const FILE = 'file://' + path.resolve(process.cwd(), INPUT);
+const DIM = (process.argv[4] || '1080x1920').split('x').map(Number);
+const W = DIM[0] || 1080, H = DIM[1] || 1920;
 const TRANSITION_MS = 1300;  // camera ease (matches CSS 1.25s + margin)
 const DWELL_MS = 3400;       // hold per scene once the camera settles
 
@@ -57,11 +61,15 @@ const DWELL_MS = 3400;       // hold per scene once the camera settles
   await page.goto(FILE);
   await page.waitForFunction(() => typeof window.go === 'function');
   await page.evaluate(() => window.setPlay(false)); // drive the timeline ourselves
-  const n = await page.evaluate(() => document.querySelectorAll('#dots button').length);
+  await page.evaluate(() => { const h = document.getElementById('soundhint'); if (h) h.style.display = 'none'; });
+  // per-scene durations (seconds) exposed by index.html; fall back to a fixed hold
+  const durs = await page.evaluate(() =>
+    window.SCENE_DUR || Array(document.querySelectorAll('#dots button').length).fill(0));
 
-  for (let s = 0; s < n; s++) {
+  for (let s = 0; s < durs.length; s++) {
     await page.evaluate((i) => window.go(i, true), s);
-    await page.waitForTimeout(TRANSITION_MS + DWELL_MS);
+    const hold = durs[s] > 0 ? durs[s] * 1000 : (TRANSITION_MS + DWELL_MS);
+    await page.waitForTimeout(hold);
   }
 
   await context.close(); // finalizes the .webm
@@ -74,13 +82,19 @@ const DWELL_MS = 3400;       // hold per scene once the camera settles
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   const ff = findFfmpeg();
   console.log(`Transcoding ${webm} -> ${OUT}`);
-  const r = spawnSync(ff, [
+  // source is already W×H from recordVideo — skip the (memory-heavy, flaky) lanczos rescale
+  const args = [
     '-y', '-i', webmPath,
     '-c:v', 'libx264', '-pix_fmt', 'yuv420p',
-    '-vf', `scale=${W}:${H}:flags=lanczos,fps=${FPS}`,
+    '-vf', `fps=${FPS}`,
     '-movflags', '+faststart', '-crf', '20', '-preset', 'medium',
     OUT,
-  ], { stdio: 'inherit' });
+  ];
+  let r = spawnSync(ff, args, { stdio: 'inherit' });
+  if (r.status !== 0) {           // one retry — the transcode occasionally crashes on first spawn
+    console.error('ffmpeg failed, retrying once…');
+    r = spawnSync(ff, args, { stdio: 'inherit' });
+  }
   fs.rmSync(vidDir, { recursive: true, force: true });
   if (r.status !== 0) { console.error('ffmpeg failed'); process.exit(1); }
   const mb = (fs.statSync(OUT).size / 1e6).toFixed(1);
