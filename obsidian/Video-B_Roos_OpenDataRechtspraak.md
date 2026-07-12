@@ -2,9 +2,9 @@
 title: "Video B — Roos: Open Data Rechtspraak (walk & explain)"
 type: video-productie
 project: Recruitin / Gelre — uitlegvideo
-status: in-review
+status: final
 aspect: "16:9"
-duur: "~30s"
+duur: "~32s (final v3)"
 stem: "Roos (voice-clone)"
 datum: 2026-07-12
 tags: [video, rechtspraak, ecli, roos, voice-over, higgsfield]
@@ -76,15 +76,25 @@ Montage: `explainer_video` · 1280×720 · job `4af26b59-1846-4b7e-a2ce-5f3a6c23
 ## Kosten (Higgsfield credits)
 - 7 keyframes (soul_2) + 6 clips × 7,5 + VO-takes (elevenlabs) → ~55 cr totaal.
 
-## Openstaande punten
-> [!warning] Overgangen tussen scènes
-> `explainer_video` plakt de clips **hard** aan elkaar (geen crossfade-optie).
-> Echte overvloeiers vragen lokale ffmpeg-montage, maar de bron-clips staan
-> achter een geblokkeerde CDN (download 403 in de sandbox). Opties:
-> 1. Clips as-is met harde match-cuts (huidige staat).
-> 2. Clips downloaden op eigen machine → ffmpeg `xfade` crossfades (~0,4s) ertussen.
-> 3. Scènes hergenereren als losse single-scene shots i.p.v. dual-keyframe morphs,
->    zodat de cuts als schone match-cuts lezen.
+## Finale montage — v3 (opgelost)
+> [!success] Definitieve versie
+> **Overgangen + VO-timing lokaal met ffmpeg opgelost** (clips via Drive→zip→chat op schijf).
+
+Pipeline (lokaal, `imageio-ffmpeg` 7.0.2 wegens `xfade`):
+1. **Crossfades**: 6 clips met `xfade=transition=dissolve:duration=0.5` (dip-to-black `fadeblack` en 0,8s dissolve waren tussenvarianten).
+2. **Scènes vertraagd ~15%** (`setpts=1.15*PTS`) → elke scène ~5,8s, zodat de VO ademruimte krijgt.
+3. **VO sequentieel** op de scène-starts (0 · 5,3 · 10,6 · 15,9 · 21,2 · 26,5s) via `adelay`+`amix=normalize=0` → geen overlap, korte stilte-pauze na elke zin vóór de dissolve.
+4. Video `-c:v copy`, audio AAC 192k, `alimiter`. Eindduur **32,3s**.
+
+Iteraties (feedback → fix):
+- harde cut → glitch → **crossfade** (beter);
+- dissolve-glitch → **fadeblack / langere dissolve** (B gekozen);
+- VO-overlap ("2e start als 1e nog draait") → **sequentiële VO** (0,5s dissolve);
+- geen adempauze → **scènes 15% vertraagd + gap** (v3, akkoord).
+
+> [!note] Nog strakker? DaVinci Resolve
+> Voor een échte optical-flow morph over de Kling-cliprand: DaVinci "Smooth Cut" +
+> Retime → Optical Flow. Assets (6 clips + `roos_vo_1..6.mp3`) staan in de Drive-map.
 
 ## Reproduceren
 1. Voice-element **Roos-1** bestaat al (`1f7dd884-…`); anders opnieuw clonen via create_voice (upload-tab, sample `Roos_stem_sample_45s.mp3`).
