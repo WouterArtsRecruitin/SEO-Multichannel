@@ -40,9 +40,13 @@ function findFfmpeg() {
   return 'ffmpeg';
 }
 
-const W = 1080, H = 1920, FPS = 30;
+const FPS = 30;
 const OUT = process.argv[2] || path.resolve('dist/omnichannel-architecture-1080x1920.mp4');
-const FILE = 'file://' + path.resolve(__dirname, '..', 'index.html');
+// optional args: [outfile] [inputHtml] [WxH]   e.g. node record.js out.mp4 explainer-ecli/index.html 1920x1080
+const INPUT = process.argv[3] || 'index.html';
+const FILE = 'file://' + path.resolve(process.cwd(), INPUT);
+const DIM = (process.argv[4] || '1080x1920').split('x').map(Number);
+const W = DIM[0] || 1080, H = DIM[1] || 1920;
 const TRANSITION_MS = 1300;  // camera ease (matches CSS 1.25s + margin)
 const DWELL_MS = 3400;       // hold per scene once the camera settles
 
