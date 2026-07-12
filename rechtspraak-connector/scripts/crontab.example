@@ -1,0 +1,25 @@
+# Rechtspraak API Connector — nachtelijke run (elke nacht 03:15).
+# Installeer met:  crontab -e   en plak de regel hieronder (pas paden aan).
+#
+# Let op fair-use: houd het bij één run per nacht.
+15 3 * * *  cd /opt/gelre/rechtspraak-connector && /usr/bin/python3 scripts/run_daily.py >> logs/run.log 2>&1
+
+# --- Alternatief: systemd timer (robuuster, met logging via journalctl) ---
+# /etc/systemd/system/rechtspraak.service
+#   [Unit]
+#   Description=Rechtspraak connector nightly
+#   [Service]
+#   Type=oneshot
+#   WorkingDirectory=/opt/gelre/rechtspraak-connector
+#   ExecStart=/usr/bin/python3 scripts/run_daily.py
+#
+# /etc/systemd/system/rechtspraak.timer
+#   [Unit]
+#   Description=Run rechtspraak connector nightly
+#   [Timer]
+#   OnCalendar=*-*-* 03:15:00
+#   Persistent=true
+#   [Install]
+#   WantedBy=timers.target
+#
+#   systemctl enable --now rechtspraak.timer

@@ -1,0 +1,60 @@
+# Gelre Advocaten — Rechtspraak API Connector
+# Eenmalig instellen. Kopieer naar config/config.yaml en pas aan.
+
+rechtspraak:
+  base_url: "https://data.rechtspraak.nl"
+  # DOC = alleen uitspraken met volledige tekst; META = ook zonder tekst.
+  return_type: "DOC"
+  max_per_page: 100          # paginagrootte voor /uitspraken/zoeken (?max=)
+  # --- Fair-use throttling (Rechtspraak vraagt: overbelast de server niet) ---
+  max_requests_per_minute: 40
+  min_request_interval_seconds: 1.2
+  request_timeout_seconds: 30
+  # Incrementeel: pak bij de nachtelijke run alles dat is gewijzigd sinds
+  # de laatste succesvolle run. Bij een eerste run wordt lookback_days gebruikt.
+  lookback_days: 3
+
+filters:
+  # Rechtsgebieden. 'subject' is de officiele PSI-URI uit de Rechtspraak-
+  # waardelijst (https://data.rechtspraak.nl/Waardelijst/Rechtsgebieden).
+  # Laat 'subject' leeg om alleen op keywords te filteren (client-side).
+  rechtsgebieden:
+    - label: "Arbeidsrecht"
+      subject: "http://psi.rechtspraak.nl/rechtsgebied#arbeidsrecht"
+    - label: "Personen- en familierecht"
+      subject: "http://psi.rechtspraak.nl/rechtsgebied#civielRecht_personenEnFamilierecht"
+  # Optioneel: beperk tot bepaalde instanties (creator). Leeg = alle.
+  instanties: []
+  # 'uitspraak' en/of 'conclusie'
+  types:
+    - "uitspraak"
+  # Extra client-side filter op de tekst (titel + samenvatting + inhoud).
+  keywords:
+    - "ontslag op staande voet"
+    - "letselschade"
+  keyword_match: "any"       # any | all | off
+
+export:
+  target: "markdown"         # markdown | supabase | both
+  markdown:
+    vault_path: "./vault/Jurisprudentie"   # Obsidian-map
+  supabase:
+    # Verbinding via env DATABASE_URL (zie .env.example).
+    table: "uitspraken"
+    run_log_table: "run_log"
+
+state:
+  # Bestand waarin de laatste succesvolle run-tijd wordt bewaard (incrementeel).
+  path: "./.state.json"
+
+reconcile:
+  # Controleer periodiek of eerder opgeslagen ECLI's zijn ingetrokken/verwijderd.
+  enabled: true
+  # Hercontroleer een ECLI hooguit eens per zoveel dagen (bespaart requests).
+  recheck_after_days: 14
+  # Maximaal aantal her-checks per run (fair-use).
+  max_rechecks_per_run: 200
+
+notify:
+  on_withdrawn: true         # log + optionele webhook bij ingetrokken ECLI's
+  on_run_summary: true
