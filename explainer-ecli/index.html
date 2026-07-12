@@ -279,12 +279,12 @@
 window.VIDEO_W = 1920; window.VIDEO_H = 1080;
 
 const SCENES = [
-  { dur:14, onEnter:typeSearch },
-  { dur:20 },
-  { dur:29, onEnter:streamFeed },
-  { dur:23 },
-  { dur:23 },
-  { dur:16 },
+  { dur:16, onEnter:typeSearch },   // ~ VO paragraaf 1
+  { dur:24 },                        // ECLI-opbouw
+  { dur:30, onEnter:streamFeed },   // open API + feed
+  { dur:23 },                        // 3 stappen
+  { dur:24 },                        // wat levert het op
+  { dur:17 },                        // CTA
 ];
 window.SCENE_DUR = SCENES.map(s=>s.dur||10);
 
